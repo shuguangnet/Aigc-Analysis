@@ -1,6 +1,6 @@
 import {LikeFilled,LikeOutlined,MessageOutlined,PlusOutlined,SendOutlined,} from '@ant-design/icons';
 import type { UploadFile, UploadProps } from 'antd';
-import {Avatar,Button,Card,Comment,Divider,Form,Image,Input,List,message,Space,Tooltip,Upload} from 'antd';
+import {Avatar,Button,Card,Divider,Form,Image,Input,List,message,Space,Tooltip,Upload} from 'antd';
 import moment from 'moment';
 import React, { useState } from 'react';
 
