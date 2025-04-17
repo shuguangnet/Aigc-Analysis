@@ -3,11 +3,13 @@ export default [
     { name: '登录', path: '/user/login', component: './User/Login' },
     { name: '注册', path: '/user/register', component: './User/Register' }
   ]},
-  {path:"/", redirect: "/add_chart"},
+  {path:"/", redirect: "/home"},
 
+  { path: '/home', name :"首页", icon: "PieChartOutlined", component: './HomePage' },
   { path: '/add_chart', name :"智能分析", icon: "barChart", component: './AddChart' },
   { path: '/add_async', name :"智能分析(异步)", icon: "DotChartOutlined", component: './AddChartAsync' },
-  { path: '/my_chart', name :"我的图表", icon: "PictureOutlined", component: './MyChart' },
+  { path: '/my_chart', name: "我的图表", icon: "PictureOutlined", component: './MyChart' },
+    { path: '/open_platform', name :"开放中心", icon: "ApiOutlined", component: './OpenPlatform' },
   { path: '/forum', name :"交流论坛", icon: "CrownOutlined", component: './Forum' },
   {
     path: '/admin',
