@@ -1,0 +1,93 @@
+.container {
+    min-height: 600px;
+
+    .steps {
+        margin-bottom: 24px;
+    }
+
+    .content {
+        padding: 24px;
+    }
+}
+
+.uploadStep {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.previewCard {
+    margin-top: 24px;
+
+    .previewTable {
+        width: 100%;
+        border-collapse: collapse;
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #f0f0f0;
+            text-align: left;
+        }
+
+        th {
+            background: #fafafa;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+    }
+}
+
+.goalStep {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: left;
+
+    .goalInput {
+        margin: 24px 0;
+    }
+
+    .generateButton {
+        min-width: 200px;
+    }
+
+    .progressContainer {
+        margin-top: 24px;
+        text-align: center;
+    }
+}
+
+.reportStep {
+    .reportPreview {
+        margin-top: 24px;
+        padding: 24px;
+        background: #fafafa;
+        border-radius: 8px;
+
+        .chartCard {
+            margin-top: 16px;
+        }
+    }
+}
+
+:global {
+    .ant-upload-drag {
+        border: 2px dashed #d9d9d9;
+        border-radius: 8px;
+        transition: all 0.3s;
+
+        &:hover {
+            border-color: #1890ff;
+        }
+    }
+
+    .ant-steps-item-icon {
+        background: #fff !important;
+
+        .anticon {
+            color: #1890ff;
+        }
+    }
+}

@@ -1,0 +1,139 @@
+.container {
+  :global {
+    .ant-pro-page-container-children-content {
+      margin: 24px;
+    }
+  }
+}
+
+.mainCard {
+  min-height: 80vh;
+  background: linear-gradient(to bottom, #ffffff, #f0f2f5);
+}
+
+.analysisTypeSelector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+
+  .analysisTag {
+    cursor: pointer;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 16px;
+    transition: all 0.3s;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.uploadCard {
+  background: #fafafa;
+  border-radius: 8px;
+  
+  :global {
+    .ant-upload-drag {
+      border: 2px dashed #d9d9d9;
+      border-radius: 8px;
+      padding: 24px;
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: #1890ff;
+      }
+    }
+  }
+
+  .uploadIcon {
+    font-size: 48px;
+    color: #1890ff;
+  }
+}
+
+.chatContainer {
+  height: 500px;
+  overflow-y: auto;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .messageList {
+    .userMessage {
+      justify-content: flex-end;
+      
+      .messageCard {
+        background: #e6f7ff;
+      }
+    }
+
+    .assistantMessage {
+      justify-content: flex-start;
+
+      .messageCard {
+        background: #fff;
+      }
+    }
+  }
+}
+
+.messageCard {
+  max-width: 80%;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .avatar {
+    background: #1890ff;
+  }
+
+  .chartContainer {
+    margin-top: 16px;
+    padding: 16px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.inputContainer {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+
+  .input {
+    border-radius: 8px;
+    resize: none;
+    
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+  }
+
+  .sendButton {
+    align-self: flex-end;
+    height: 40px;
+    border-radius: 8px;
+    padding: 0 24px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .analysisTypeSelector {
+    justify-content: center;
+  }
+
+  .messageCard {
+    max-width: 90%;
+  }
+
+  .inputContainer {
+    flex-direction: column;
+    
+    .sendButton {
+      width: 100%;
+    }
+  }
+}

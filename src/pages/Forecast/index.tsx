@@ -12,10 +12,22 @@ import {
   message,
   Tooltip,
   Space,
+  Tag,
+  Divider,
 } from 'antd';
-import { SendOutlined, RobotOutlined, UserOutlined, InboxOutlined } from '@ant-design/icons';
+import {
+  SendOutlined,
+  RobotOutlined,
+  UserOutlined,
+  InboxOutlined,
+  LineChartOutlined,
+  BarChartOutlined,
+  PieChartOutlined,
+  AreaChartOutlined,
+} from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import ReactECharts from 'echarts-for-react';
+import styles from './index.less';
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -37,11 +49,58 @@ const AnalysisCenter: React.FC = () => {
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   const analysisOptions = [
-    { value: 'predictive', label: '预测性分析' },
-    { value: 'descriptive', label: '描述性统计' },
-    { value: 'anomaly', label: '异常检测' },
-    { value: 'quality', label: '数据质量分析' },
+    { value: 'predictive', label: '预测性分析', icon: <LineChartOutlined />, color: '#1890ff' },
+    { value: 'descriptive', label: '描述性统计', icon: <BarChartOutlined />, color: '#52c41a' },
+    { value: 'anomaly', label: '异常检测', icon: <PieChartOutlined />, color: '#faad14' },
+    { value: 'quality', label: '数据质量分析', icon: <AreaChartOutlined />, color: '#722ed1' },
   ];
+
+  const generateMockChart = (type: string) => {
+    switch (type) {
+      case 'predictive':
+        return {
+          title: { text: '销售趋势预测', left: 'center' },
+          tooltip: { trigger: 'axis' },
+          legend: { data: ['历史数据', '预测数据'], bottom: 10 },
+          grid: { top: 50, right: 20, bottom: 60, left: 40 },
+          xAxis: {
+            type: 'category',
+            data: ['1月', '2月', '3月', '4月', '5月', '6月'],
+            axisLabel: { interval: 0 }
+          },
+          yAxis: { type: 'value', name: '销售额' },
+          series: [
+            {
+              name: '历史数据',
+              type: 'line',
+              data: [150, 230, 224, 218, 135, 147],
+              smooth: true,
+            },
+            {
+              name: '预测数据',
+              type: 'line',
+              data: [null, null, null, 225, 238, 251],
+              smooth: true,
+              lineStyle: { type: 'dashed' },
+            }
+          ]
+        };
+      case 'descriptive':
+        return {
+          title: { text: '数据分布情况', left: 'center' },
+          tooltip: { trigger: 'axis' },
+          grid: { top: 50, right: 20, bottom: 60, left: 40 },
+          xAxis: { type: 'category', data: ['极小值', '下四分位', '中位数', '上四分位', '极大值'] },
+          yAxis: { type: 'value' },
+          series: [{
+            type: 'boxplot',
+            data: [[10, 25, 35, 50, 70]],
+            itemStyle: { color: '#52c41a' }
+          }]
+        };
+    }
+    return baseOption;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -92,72 +151,72 @@ const AnalysisCenter: React.FC = () => {
     return responses[type] || '分析完成';
   };
 
-  const generateMockChart = (type: string) => {
-    const baseOption = {
-      xAxis: {
-        type: 'category',
-        data: ['1月', '2月', '3月', '4月', '5月', '6月'],
-      },
-      yAxis: {
-        type: 'value',
-      },
-      series: [{
-        data: [150, 230, 224, 218, 135, 147],
-        type: 'line',
-      }],
-    };
-    return baseOption;
-  };
-
   return (
-    <PageContainer>
-      <Card>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Select
-            style={{ width: '100%' }}
-            value={analysisType}
-            onChange={setAnalysisType}
-            placeholder="请选择分析类型"
-          >
+    <PageContainer
+      className={styles.container}
+      title="智能预测分析"
+      subTitle="上传数据，获取专业的数据分析见解"
+    >
+      <Card bordered={false} className={styles.mainCard}>
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <div className={styles.analysisTypeSelector}>
             {analysisOptions.map(option => (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
+              <Tooltip key={option.value} title={option.label}>
+                <Tag
+                  className={styles.analysisTag}
+                  color={analysisType === option.value ? option.color : 'default'}
+                  icon={option.icon}
+                  onClick={() => setAnalysisType(option.value)}
+                >
+                  {option.label}
+                </Tag>
+              </Tooltip>
             ))}
-          </Select>
+          </div>
 
-          <Dragger
-            fileList={fileList}
-            onChange={({ fileList }) => setFileList(fileList)}
-            beforeUpload={(file) => {
-              setFileList([file]);
-              return false;
-            }}
-          >
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">点击或拖拽文件上传</p>
-            <p className="ant-upload-hint">支持 CSV、Excel 等数据文件格式</p>
-          </Dragger>
+          <Card className={styles.uploadCard}>
+            <Dragger
+              fileList={fileList}
+              onChange={({ fileList }) => setFileList(fileList)}
+              beforeUpload={(file) => {
+                const isExcelOrCsv = /\.(xlsx|xls|csv)$/.test(file.name.toLowerCase());
+                if (!isExcelOrCsv) {
+                  message.error('只支持 Excel 或 CSV 文件！');
+                  return false;
+                }
+                setFileList([file]);
+                return false;
+              }}
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined className={styles.uploadIcon} />
+              </p>
+              <p className="ant-upload-text">点击或拖拽文件上传</p>
+              <p className="ant-upload-hint">支持 Excel (.xlsx, .xls) 或 CSV 文件格式</p>
+            </Dragger>
+          </Card>
 
-          <div style={{ height: '400px', overflowY: 'auto', marginBottom: '16px' }}>
+          <div className={styles.chatContainer}>
             <List
+              className={styles.messageList}
               itemLayout="horizontal"
               dataSource={messages}
               renderItem={item => (
-                <List.Item style={{ justifyContent: item.type === 'user' ? 'flex-end' : 'flex-start' }}>
-                  <Card style={{ maxWidth: '80%' }}>
+                <List.Item className={item.type === 'user' ? styles.userMessage : styles.assistantMessage}>
+                  <Card className={styles.messageCard}>
                     <List.Item.Meta
                       avatar={
-                        <Avatar icon={item.type === 'user' ? <UserOutlined /> : <RobotOutlined />} />
+                        <Avatar
+                          icon={item.type === 'user' ? <UserOutlined /> : <RobotOutlined />}
+                          className={styles.avatar}
+                        />
                       }
                       title={item.type === 'user' ? '你' : 'AI 助手'}
                       description={item.content}
                     />
                     {item.charts && (
-                      <div style={{ marginTop: '16px' }}>
-                        <ReactECharts option={item.charts} style={{ height: '300px' }} />
+                      <div className={styles.chartContainer}>
+                        <ReactECharts option={item.charts} style={{ height: 300 }} />
                       </div>
                     )}
                   </Card>
@@ -167,12 +226,13 @@ const AnalysisCenter: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className={styles.inputContainer}>
             <TextArea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="请输入你的分析需求..."
+              placeholder="请描述您的分析需求..."
               autoSize={{ minRows: 2, maxRows: 6 }}
+              className={styles.input}
               onPressEnter={(e) => {
                 if (!e.shiftKey) {
                   e.preventDefault();
@@ -185,9 +245,9 @@ const AnalysisCenter: React.FC = () => {
               icon={<SendOutlined />}
               onClick={handleSend}
               loading={loading}
-              style={{ alignSelf: 'flex-end' }}
+              className={styles.sendButton}
             >
-              发送
+              分析
             </Button>
           </div>
         </Space>
