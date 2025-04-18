@@ -8,6 +8,7 @@ import { marked } from 'marked';
 import styles from './index.less';
 import { Document, Packer, Paragraph as DocxParagraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
 
 const { Dragger } = Upload;
 const { TextArea } = Input;
@@ -49,59 +50,91 @@ const ReportPage: React.FC = () => {
   const handleUpload = async (file: File) => {
     setLoading(true);
     try {
-      // 读取文件为 base64
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
-        const base64Image = reader.result as string;
-        
-        // 调用 NewAPI 接口
-        try {
-          const response = await fetch('https://aizex.top/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o',
-              messages: [
-                {
-                  role: 'user',
-                  content: [
-                    {
-                      type: 'text',
-                      text: '请分析这张图表中的数据趋势和关键信息，并给出专业的分析见解。'
-                    },
-                    {
-                      type: 'image_url',
-                      image_url: {
-                        url: base64Image
-                      }
-                    }
-                  ]
-                }
-              ],
-              max_tokens: 1000
-            })
-          });
+      const isImage = file.type.startsWith('image/');
+      const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                      file.type === 'application/vnd.ms-excel';
+      const isCsv = file.type === 'text/csv';
 
-          const data: AnalysisResponse = await response.json();
-          
-          setPreviewData({
-            columns: ['分析结果'],
-            data: [[data.choices[0].message.content]]
+      if (isImage) {
+        // 处理图片文件
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const base64Image = reader.result as string;
+          await analyzeData({
+            type: 'image_url',
+            image_url: {
+              url: base64Image
+            }
           });
+        };
+      } else if (isExcel || isCsv) {
+        // 处理 Excel/CSV 文件
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const data = e.target?.result;
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
           
-          message.success('图片分析成功');
-          setCurrentStep(1);
-        } catch (error) {
-          message.error('图片分析失败');
-          console.error('API调用失败:', error);
-        }
-      };
+          // 将数据转换为字符串
+          const textContent = jsonData.map(row => row.join('\t')).join('\n');
+          
+          await analyzeData({
+            type: 'text',
+            text: textContent
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        message.error('不支持的文件格式');
+        setLoading(false);
+      }
     } catch (error) {
       message.error('文件处理失败');
+      console.error('文件处理失败:', error);
+      setLoading(false);
+    }
+  };
+
+  const analyzeData = async (content: any) => {
+    try {
+      const response = await fetch('https://aizex.top/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: '请分析这些数据的趋势和关键信息，并给出专业的分析见解。'
+                },
+                content
+              ]
+            }
+          ],
+          max_tokens: 1000
+        })
+      });
+
+      const data: AnalysisResponse = await response.json();
+      
+      setPreviewData({
+        columns: ['分析结果'],
+        data: [[data.choices[0].message.content]]
+      });
+      
+      message.success('数据分析成功');
+      setCurrentStep(1);
+    } catch (error) {
+      message.error('数据分析失败');
+      console.error('API调用失败:', error);
     } finally {
       setLoading(false);
     }
