@@ -1,0 +1,62 @@
+.forumContainer {
+  .searchBar {
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 16px;
+  }
+
+  .postItem {
+    transition: all 0.3s;
+    
+    &:hover {
+      background-color: #fafafa;
+    }
+
+    .postTitle {
+      font-size: 18px;
+      font-weight: 500;
+      color: #1a1a1a;
+      
+      &:hover {
+        color: #1890ff;
+      }
+    }
+
+    .postMeta {
+      color: #8c8c8c;
+      font-size: 14px;
+    }
+
+    .postStats {
+      color: #595959;
+      font-size: 14px;
+      
+      .statItem {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        
+        &:hover {
+          color: #1890ff;
+        }
+      }
+    }
+
+    .coverImage {
+      border-radius: 8px;
+      object-fit: cover;
+      transition: transform 0.3s;
+      
+      &:hover {
+        transform: scale(1.02);
+      }
+    }
+  }
+
+  .categoryTag {
+    border-radius: 12px;
+    padding: 2px 12px;
+  }
+}

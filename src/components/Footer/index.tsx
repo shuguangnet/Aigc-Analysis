@@ -1,4 +1,4 @@
-import { GithubOutlined, HeartFilled, WechatOutlined, MailOutlined } from '@ant-design/icons';
+import {  HeartFilled } from '@ant-design/icons';
 import { DefaultFooter } from '@ant-design/pro-components';
 import React from 'react';
 
@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
       copyright={
         <div>
           <div >
-            Copyright © 2023-{currentYear} 陕西科技大学镐京学院
+            Copyright © {currentYear} 陕西科技大学镐京学院
           </div>
           <div >
             Powered by <HeartFilled  /> SunHe
@@ -31,12 +31,7 @@ const Footer: React.FC = () => {
           href: 'https://www.sust.edu.cn/',
           blankTarget: true,
         },
-        {
-          key: 'github',
-          title: <GithubOutlined />,
-          href: 'https://github.com/shuguangnet',
-          blankTarget: true,
-        },
+        
        
       ]}
     />
