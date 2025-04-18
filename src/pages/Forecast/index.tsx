@@ -28,6 +28,7 @@ import {
 import type { UploadFile } from 'antd/es/upload/interface';
 import ReactECharts from 'echarts-for-react';
 import styles from './index.less';
+import * as XLSX from 'xlsx';
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -105,6 +106,78 @@ const AnalysisCenter: React.FC = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const handleFileAnalysis = async (file: File) => {
+  try {
+    const reader = new FileReader();
+    
+    reader.onload = async (e) => {
+      const data = e.target?.result;
+      let textContent = '';
+      
+      if (file.name.toLowerCase().endsWith('.csv')) {
+        textContent = data as string;
+      } else {
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        textContent = jsonData.map(row => row.join('\t')).join('\n');
+      }
+
+      const response = await fetch('https://aizex.top/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `请对以下数据进行${analysisOptions.find(opt => opt.value === analysisType)?.label}，并给出专业的分析见解：\n${textContent}`
+                }
+              ]
+            }
+          ],
+          max_tokens: 2000
+        })
+      });
+
+      const result = await response.json();
+      
+      const userMessage: Message = {
+        type: 'user',
+        content: `已上传文件：${file.name}`,
+        timestamp: Date.now(),
+      };
+
+      const assistantMessage: Message = {
+        type: 'assistant',
+        content: result.choices[0].message.content,
+        timestamp: Date.now(),
+        charts: generateMockChart(analysisType),
+      };
+
+      setMessages(prev => [...prev, userMessage, assistantMessage]);
+      setLoading(false);
+      scrollToBottom();
+    };
+
+    if (file.name.toLowerCase().endsWith('.csv')) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsArrayBuffer(file);
+    }
+  } catch (error) {
+    console.error('文件处理失败:', error);
+    message.error('文件处理失败');
+    setLoading(false);
+  }
+};
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -185,6 +258,8 @@ const AnalysisCenter: React.FC = () => {
                   return false;
                 }
                 setFileList([file]);
+                setLoading(true);
+                handleFileAnalysis(file);
                 return false;
               }}
             >
@@ -209,10 +284,15 @@ const AnalysisCenter: React.FC = () => {
                         <Avatar
                           icon={item.type === 'user' ? <UserOutlined /> : <RobotOutlined />}
                           className={styles.avatar}
+                          style={{ padding: '8px' }}
                         />
                       }
                       title={item.type === 'user' ? '你' : 'AI 助手'}
-                      description={item.content}
+                      description={
+                        <div style={{  whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                          {item.content}
+                        </div>
+                      }
                     />
                     {item.charts && (
                       <div className={styles.chartContainer}>
@@ -255,5 +335,7 @@ const AnalysisCenter: React.FC = () => {
     </PageContainer>
   );
 };
+
+
 
 export default AnalysisCenter;
