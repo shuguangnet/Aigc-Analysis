@@ -7,13 +7,11 @@ import {
   Button,
   List,
   Avatar,
-  Spin,
   Upload,
   message,
   Tooltip,
   Space,
   Tag,
-  Divider,
 } from 'antd';
 import {
   SendOutlined,
@@ -31,7 +29,6 @@ import styles from './index.less';
 import * as XLSX from 'xlsx';
 import { marked } from 'marked';
 
-const { Option } = Select;
 const { Dragger } = Upload;
 const { TextArea } = Input;
 
@@ -262,7 +259,8 @@ const AnalysisCenter: React.FC = () => {
         const assistantMessage: Message = {
           type: 'assistant',
           content: marked(result.choices[0].message.content
-            .replace(/```json\n[\s\S]*?\n```/g, '') // 先移除 JSON 代码块
+            // 移除 JSON 代码块
+            .replace(/```json\n[\s\S]*?\n```/g, '') 
             .trim()
           ),
           timestamp: Date.now(),
@@ -286,15 +284,7 @@ const AnalysisCenter: React.FC = () => {
     }
   };
 
-    const generateMockResponse = (type: string) => {
-      const responses: { [key: string]: string } = {
-        predictive: '根据历史数据分析，预计未来三个月的销售增长率将达到15%，主要增长点来自新市场的开拓。',
-        descriptive: '数据集中包含1000条记录，平均值为45.6，标准差为12.3，分布呈现正态分布特征。',
-        anomaly: '检测到3个异常值点，主要出现在数据的边缘区域，建议进行进一步核实。',
-        quality: '数据完整性为98.5%，存在少量缺失值，建议对缺失数据进行适当的填充处理。',
-      };
-      return responses[type] || '分析完成';
-    };
+    
 
     return (
       <PageContainer

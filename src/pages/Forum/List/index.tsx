@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, List, Tag, Space, Input, Button, Select, Badge } from 'antd';
 import { history } from '@umijs/max';
 import {
-  SearchOutlined,
   PlusOutlined,
   EyeOutlined,
   MessageOutlined,
@@ -139,14 +138,14 @@ const ForumList: React.FC = () => {
             key={item.id}
             className={styles.postItem}
             actions={[
-              <Space className={styles.postStats}>
-                <span className={styles.statItem}>
+              <Space key={"actions"} className={styles.postStats}>
+                <span key="views" className={styles.statItem}>
                   <EyeOutlined /> {item.views}
                 </span>
-                <span className={styles.statItem}>
+                <span key="comments" className={styles.statItem}>
                   <MessageOutlined /> {item.comments}
                 </span>
-                <span className={styles.statItem}>
+                <span key="likes" className={styles.statItem}>
                   <LikeOutlined /> {item.likes}
                 </span>
               </Space>,

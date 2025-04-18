@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { PageContainer } from '@ant-design/pro-components';
-import { InboxOutlined, CopyOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Upload, Card, Button, Tabs, message, Input, Spin, Radio, Space, Tooltip } from 'antd';
+import {  CopyOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Upload, Card, Button, Tabs, message, Radio, Space, Tooltip } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
-import ReactECharts from 'echarts-for-react';
 import Mermaid from '@/components/Mermaid';
 import MonacoEditor from '@/components/MonacoEditor';
 
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
-const { TextArea } = Input;
 
 interface AnalysisResponse {
   id: string;

@@ -21,7 +21,7 @@ const ForumPublish: React.FC = () => {
   const handleSubmit = async (values: any) => {
     setSubmitting(true);
     try {
-      // 这里处理表单提交
+      // 处理表单提交
       console.log('提交数据:', values);
       message.success('发布成功');
       history.push('/forum/list');

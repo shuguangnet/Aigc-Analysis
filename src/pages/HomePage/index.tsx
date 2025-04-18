@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
     avgGenerationTime: 2.5,
   });
 
-  // 图表类型分布 - 用于显示图标的数据
+  // 图表类型分布
   const chartTypes = [
     { value: 35, name: '折线图', icon: <LineChartOutlined /> },
     { value: 30, name: '柱状图', icon: <BarChartOutlined /> },
@@ -34,7 +34,7 @@ const HomePage: React.FC = () => {
     { value: 15, name: '散点图', icon: <DotChartOutlined /> },
   ];
   
-  // 为ECharts准备的数据，不包含React组件
+  // ECharts准备的数据
   const chartTypesForEcharts = chartTypes.map(({ value, name }) => ({ value, name }));
 
   const chartOptions = {
@@ -130,7 +130,7 @@ const HomePage: React.FC = () => {
         labelLine: {
           show: false,
         },
-        // 这里使用过滤后的数据，不包含React组件
+        // 使用过滤后的数据
         data: chartTypesForEcharts,
       },
     ],

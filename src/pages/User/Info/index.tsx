@@ -22,7 +22,7 @@ import {
   UploadOutlined,
 } from '@ant-design/icons';
 import { useModel } from '@umijs/max';
-import type { RcFile, UploadProps } from 'antd/es/upload';
+import type {  UploadProps } from 'antd/es/upload';
 
 const { TabPane } = Tabs;
 

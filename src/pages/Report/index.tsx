@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { PageContainer } from '@ant-design/pro-components';
 import { InboxOutlined, FileExcelOutlined, BarChartOutlined, FileWordOutlined } from '@ant-design/icons';
-import { Upload, Card, Button, Steps, message, Input, Spin, Result, Space, Progress, Alert, Typography } from 'antd';
+import { Upload, Card, Button, Steps, message, Input, Spin, Result, Progress, Alert, Typography } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
-import ReactECharts from 'echarts-for-react';
 import { marked } from 'marked';
 import styles from './index.less';
 import { Document, Packer, Paragraph as DocxParagraph, TextRun } from 'docx';
