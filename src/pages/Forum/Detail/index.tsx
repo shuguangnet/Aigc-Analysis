@@ -10,6 +10,7 @@ import {
   Input,
   message,
   Tag,
+  List,
 } from 'antd';
 import {
   LikeOutlined,
@@ -22,11 +23,40 @@ import {
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
 
+// Mock comment data
+const mockComments = [
+  {
+    id: 1,
+    author: '张三',
+    avatar: 'https://joeschmoe.io/api/v1/random',
+    content: '这个帖子很有帮助，感谢分享！',
+    createTime: '2024-03-20 10:00',
+    likes: 5,
+  },
+  {
+    id: 2,
+    author: '李四',
+    avatar: 'https://joeschmoe.io/api/v1/random',
+    content: '我也有一些补充，大家可以参考一下...',
+    createTime: '2024-03-20 11:30',
+    likes: 3,
+  },
+  {
+    id: 3,
+    author: '王五',
+    avatar: 'https://joeschmoe.io/api/v1/random',
+    content: '学到了很多新知识，期待更多分享！',
+    createTime: '2024-03-20 14:15',
+    likes: 2,
+  },
+];
+
 const ForumDetail: React.FC = () => {
   const { id } = useParams();
   const [liked, setLiked] = useState(false);
   const [collected, setCollected] = useState(false);
   const [comment, setComment] = useState('');
+  const [comments, setComments] = useState(mockComments);
 
   const handleSubmitComment = () => {
     if (!comment.trim()) {
@@ -34,6 +64,15 @@ const ForumDetail: React.FC = () => {
       return;
     }
     // 提交评论
+    const newComment = {
+      id: comments.length + 1,
+      author: '当前用户',
+      avatar: 'https://joeschmoe.io/api/v1/random',
+      content: comment,
+      createTime: new Date().toLocaleString(),
+      likes: 0,
+    };
+    setComments([newComment, ...comments]);
     message.success('评论成功');
     setComment('');
   };
@@ -93,8 +132,33 @@ const ForumDetail: React.FC = () => {
             发表评论
           </Button>
 
-          {/* 评论列表 */}
-          {/* 这里可以复用你原有的评论列表组件 */}
+          <List
+            style={{ marginTop: 24 }}
+            itemLayout="horizontal"
+            dataSource={comments}
+            renderItem={(item) => (
+              <List.Item
+                actions={[
+                  <Button type="text" icon={<LikeOutlined />} key="list-loadmore-like">
+                    {item.likes}
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={<Avatar src={item.avatar} />}
+                  title={
+                    <Space>
+                      <span>{item.author}</span>
+                      <span style={{ color: 'rgba(0, 0, 0, 0.45)', fontSize: '14px' }}>
+                        {item.createTime}
+                      </span>
+                    </Space>
+                  }
+                  description={item.content}
+                />
+              </List.Item>
+            )}
+          />
         </div>
       </article>
     </Card>
