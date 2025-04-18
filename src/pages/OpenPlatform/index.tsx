@@ -83,9 +83,9 @@ const OpenPlatform: React.FC = () => {
       <Row gutter={16}>
         <Col span={24}>
           <ProCard>
-            <Descriptions title="公益API说明" column={1}>
+            <Descriptions title="陕西科技大学镐京学院-公益API说明" column={1}>
               <Descriptions.Item label="项目介绍">
-                本项目提供免费的AI API服务，支持GPT、Claude、Stable Diffusion等多个模型，仅用于学习研究使用。
+                本项目提供免费的AI API服务，支持GPT、Claude、Deepseek等多个模型，仅用于学习研究使用。
               </Descriptions.Item>
               <Descriptions.Item label="使用须知">
                 1. 请勿用于商业用途
@@ -94,8 +94,8 @@ const OpenPlatform: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="联系方式">
                 遇到问题请通过以下方式联系：
-                Email: support@example.com
-                GitHub: https://github.com/your-repo
+                Email: sunhe666@163.com
+                Address: https://www.sxhju.cn
               </Descriptions.Item>
             </Descriptions>
           </ProCard>
