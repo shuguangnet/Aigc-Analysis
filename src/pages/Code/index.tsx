@@ -5,6 +5,7 @@ import { Upload, Card, Button, Tabs, message, Radio, Space, Tooltip } from 'antd
 import type { UploadFile } from 'antd/es/upload/interface';
 import Mermaid from '@/components/Mermaid';
 import MonacoEditor from '@/components/MonacoEditor';
+import html2canvas from 'html2canvas';
 
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
@@ -32,6 +33,35 @@ const CodeAnalysisPage: React.FC = () => {
     setCodeContent(value);
   };
 
+  const handleExportDiagram = async () => {
+  try {
+    const chartElement = document.querySelector('.mermaid') as HTMLElement;
+    if (!chartElement) {
+      message.warning('未找到图表元素');
+      return;
+    }
+
+    const canvas = await html2canvas(chartElement, {
+      useCORS: true,
+      scale: 2, // 提高导出图片质量
+      backgroundColor: '#ffffff'
+    });
+
+    const image = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = `diagram_${new Date().getTime()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    message.success('导出成功');
+  } catch (error) {
+    console.error('导出失败:', error);
+    message.error('导出失败，请重试');
+  }
+  };
+  
   // 处理代码分析
   const handleAnalyze = async () => {
     if (!codeContent.trim()) {
@@ -55,8 +85,8 @@ const CodeAnalysisPage: React.FC = () => {
                 {
                   type: 'text',
                   text: analysisType === 'er' 
-                    ? '请分析这段代码并生成对应的ER图，使用mermaid语法。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
-                    : '请分析这段代码并生成功能模块图，使用mermaid语法。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
+                    ? '请分析这段代码并生成对应的ER图，使用mermaid语法,用于计算机科学与技术毕业论文。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
+                    : '请分析这段代码并生成功能模块图，使用mermaid语法,用于计算机科学与技术毕业论文。。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
                 },
                 {
                   type: 'text',
@@ -172,7 +202,7 @@ const CodeAnalysisPage: React.FC = () => {
                         />
                       </Tooltip>
                       <Tooltip title="导出图表">
-                        <Button icon={<DownloadOutlined />} />
+                        <Button icon={<DownloadOutlined />} onClick={handleExportDiagram} />
                       </Tooltip>
                     </Space>
                   }>
