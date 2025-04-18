@@ -119,6 +119,12 @@ export default defineConfig({
       async: true,
     },
   ],
+  externals: {
+    'react-markdown': 'ReactMarkdown',
+  },
+  scripts: [
+    'https://unpkg.com/react-markdown@8.0.7/react-markdown.min.js',
+  ],
   //================ pro 插件配置 =================
   presets: ['umi-presets-pro'],
   /**

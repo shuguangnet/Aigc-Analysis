@@ -11,6 +11,15 @@ const { Dragger } = Upload;
 const { TabPane } = Tabs;
 const { TextArea } = Input;
 
+interface AnalysisResponse {
+  id: string;
+  choices: {
+    message: {
+      content: string;
+    };
+  }[];
+}
+
 const CodeAnalysisPage: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,48 +42,54 @@ const CodeAnalysisPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      // 这里应该调用后端API进行分析
-      // const response = await analyzeCode({ content: codeContent, type: analysisType });
+      const response = await fetch('https://aizex.top/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: analysisType === 'er' 
+                    ? '请分析这段代码并生成对应的ER图，使用mermaid语法。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
+                    : '请分析这段代码并生成功能模块图，使用mermaid语法。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
+                },
+                {
+                  type: 'text',
+                  text: codeContent
+                }
+              ]
+            }
+          ],
+          max_tokens: 2000
+        })
+      });
+
+      const data: AnalysisResponse = await response.json();
+      const content = data.choices[0].message.content;
       
-      // 模拟API响应
-      setTimeout(() => {
-        if (analysisType === 'er') {
-          setDiagramCode(`
-erDiagram
-    USER ||--o{ POST : creates
-    POST ||--|{ COMMENT : has
-    USER {
-        string username
-        string email
-        timestamp created_at
-    }
-    POST {
-        string title
-        text content
-        timestamp published_at
-    }
-    COMMENT {
-        text content
-        timestamp created_at
-    }
-          `);
-        } else {
-          setDiagramCode(`
-graph TD
-    A[用户模块] --> B[认证服务]
-    A --> C[个人中心]
-    B --> D[权限管理]
-    C --> E[设置]
-          `);
-        }
-        setAnalysisResult('分析完成，建议优化数据库索引结构，添加适当的外键约束。');
-        setActiveTab('result');
-        message.success('分析成功');
-      }, 1500);
+      // 解析返回的内容，提取 mermaid 图表代码和分析建议
+      const [diagramPart, analysisPart] = content.split('分析建议：').map(part => part.trim());
+      
+      // 提取 mermaid 代码块
+      const mermaidCode = diagramPart.match(/```mermaid\n([\s\S]*?)\n```/)?.[1] || diagramPart;
+      
+      setDiagramCode(mermaidCode);
+      setAnalysisResult(analysisPart || '暂无具体分析建议');
+      setActiveTab('result');
+      message.success('分析成功');
     } catch (error) {
-      message.error('分析失败');
+      console.error('分析失败:', error);
+      message.error('分析失败，请重试');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // 处理文件上传

@@ -1,39 +1,44 @@
 import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { Button, Card, Col, Descriptions, Input, message, Modal, Row, Space, Table, Tag } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { CopyOutlined, KeyOutlined, ReloadOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { CopyOutlined } from '@ant-design/icons';
 
 const OpenPlatform: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [visible, setVisible] = useState<boolean>(false);
-  const [apiKey, setApiKey] = useState<string>('');
-
-  // TODO:API密钥数据
-  const [keyList, setKeyList] = useState([
+  const [keyList] = useState([
     {
       id: 1,
-      accessKey: 'ak_xxxxxxxxxxxx',
-      secretKey: 'sk_xxxxxxxxxxxx',
+      accessKey: 'sk-1PBIyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXGh5S',
+      description: 'GPT-3.5-Turbo API，支持中英文对话，适合日常对话场景',
       status: 'active',
-      createTime: '2024-01-01 12:00:00',
-      expiryTime: '2025-01-01 12:00:00',
-      calls: 1234,
+      qps: '3次/秒',
+      dailyLimit: '1000次/天',
+    },
+    {
+      id: 2,
+      accessKey: 'sk-2ABCyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXABCD',
+      description: 'Claude-2 API，支持多语言对话，适合学术研究场景',
+      status: 'active',
+      qps: '2次/秒',
+      dailyLimit: '500次/天',
+    },
+    {
+      id: 3,
+      accessKey: 'sk-3DEFyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXDEF',
+      description: 'Stable Diffusion API，支持文生图、图生图等功能',
+      status: 'active',
+      qps: '1次/秒',
+      dailyLimit: '100次/天',
     },
   ]);
 
   const columns = [
     {
-      title: 'Access Key',
+      title: 'API Key',
       dataIndex: 'accessKey',
       key: 'accessKey',
-    },
-    {
-      title: 'Secret Key',
-      dataIndex: 'secretKey',
-      key: 'secretKey',
       render: (text: string) => (
         <Space>
-          <span>{'*'.repeat(20)}</span>
+          <span>{text}</span>
           <Button
             icon={<CopyOutlined />}
             type="link"
@@ -46,111 +51,64 @@ const OpenPlatform: React.FC = () => {
       ),
     },
     {
+      title: '描述',
+      dataIndex: 'description',
+      key: 'description',
+      width: '40%',
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
         <Tag color={status === 'active' ? 'green' : 'red'}>
-          {status === 'active' ? '启用' : '禁用'}
+          {status === 'active' ? '正常' : '维护中'}
         </Tag>
       ),
     },
     {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
+      title: 'QPS限制',
+      dataIndex: 'qps',
+      key: 'qps',
     },
     {
-      title: '过期时间',
-      dataIndex: 'expiryTime',
-      key: 'expiryTime',
-    },
-    {
-      title: '调用次数',
-      dataIndex: 'calls',
-      key: 'calls',
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: any, record: any) => (
-        <Space>
-          <Button type="link" danger onClick={() => handleDisableKey(record.id)}>
-            {record.status === 'active' ? '禁用' : '启用'}
-          </Button>
-          <Button type="link" danger onClick={() => handleDeleteKey(record.id)}>
-            删除
-          </Button>
-        </Space>
-      ),
+      title: '每日限额',
+      dataIndex: 'dailyLimit',
+      key: 'dailyLimit',
     },
   ];
-
-  const handleCreateKey = () => {
-    setLoading(true);
-    // 这里应该调用后端API创建密钥
-    setTimeout(() => {
-      const newKey = {
-        id: keyList.length + 1,
-        accessKey: `ak_${Math.random().toString(36).substring(2)}`,
-        secretKey: `sk_${Math.random().toString(36).substring(2)}`,
-        status: 'active',
-        createTime: new Date().toLocaleString(),
-        expiryTime: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleString(),
-        calls: 0,
-      };
-      setKeyList([...keyList, newKey]);
-      setLoading(false);
-      message.success('创建成功');
-    }, 1000);
-  };
-
-  const handleDisableKey = (id: number) => {
-    setKeyList(
-      keyList.map((key) =>
-        key.id === id ? { ...key, status: key.status === 'active' ? 'inactive' : 'active' } : key,
-      ),
-    );
-  };
-
-  const handleDeleteKey = (id: number) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '删除后无法恢复，是否继续？',
-      onOk: () => {
-        setKeyList(keyList.filter((key) => key.id !== id));
-        message.success('删除成功');
-      },
-    });
-  };
 
   return (
     <PageContainer>
       <Row gutter={16}>
         <Col span={24}>
           <ProCard>
-            <Descriptions title="接口信息" column={2}>
-              <Descriptions.Item label="接口状态">
-                <Tag color="green">正常</Tag>
+            <Descriptions title="公益API说明" column={1}>
+              <Descriptions.Item label="项目介绍">
+                本项目提供免费的AI API服务，支持GPT、Claude、Stable Diffusion等多个模型，仅用于学习研究使用。
               </Descriptions.Item>
-              <Descriptions.Item label="计费方式">按调用次数</Descriptions.Item>
-              <Descriptions.Item label="单价">0.01元/次</Descriptions.Item>
-              <Descriptions.Item label="总调用次数">1234次</Descriptions.Item>
+              <Descriptions.Item label="使用须知">
+                1. 请勿用于商业用途
+                2. 请勿滥用API资源
+                3. 遵守相关法律法规
+              </Descriptions.Item>
+              <Descriptions.Item label="联系方式">
+                遇到问题请通过以下方式联系：
+                Email: support@example.com
+                GitHub: https://github.com/your-repo
+              </Descriptions.Item>
             </Descriptions>
           </ProCard>
         </Col>
       </Row>
 
-      <Card
-        style={{ marginTop: 16 }}
-        title="API密钥管理"
-        extra={
-          <Button type="primary" icon={<KeyOutlined />} onClick={handleCreateKey} loading={loading}>
-            创建密钥
-          </Button>
-        }
-      >
-        <Table columns={columns} dataSource={keyList} rowKey="id" />
+      <Card style={{ marginTop: 16 }} title="可用API列表">
+        <Table 
+          columns={columns} 
+          dataSource={keyList} 
+          rowKey="id"
+          pagination={false}
+        />
       </Card>
 
       <Card style={{ marginTop: 16 }} title="调用示例">
@@ -159,18 +117,44 @@ const OpenPlatform: React.FC = () => {
             <pre>
               {`import requests
 
-url = "https://api.yourdomain.com/v1/generate"
+# GPT-3.5对话示例
+url = "http://api.example.com/v1/chat/completions"
 headers = {
     "Content-Type": "application/json",
-    "X-API-KEY": "your_api_key"
+    "Authorization": "Bearer ${keyList[0].accessKey}"
 }
 data = {
-    "prompt": "你的提示词",
-    "model": "gpt-3.5-turbo"
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {"role": "user", "content": "你好，请介绍一下你自己"}
+    ]
 }
 
 response = requests.post(url, json=data, headers=headers)
 print(response.json())`}
+            </pre>
+          </Descriptions.Item>
+        </Descriptions>
+
+        <Descriptions title="Node.js示例" column={1}>
+          <Descriptions.Item>
+            <pre>
+              {`const axios = require('axios');
+
+async function generateImage() {
+  const response = await axios.post('http://api.example.com/v1/images/generations', {
+    prompt: '一只可爱的猫咪',
+    n: 1,
+    size: '512x512'
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${keyList[2].accessKey}'
+    }
+  });
+  
+  console.log(response.data);
+}`}
             </pre>
           </Descriptions.Item>
         </Descriptions>

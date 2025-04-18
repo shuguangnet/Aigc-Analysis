@@ -4,11 +4,37 @@ import { InboxOutlined, FileExcelOutlined, BarChartOutlined, FileWordOutlined } 
 import { Upload, Card, Button, Steps, message, Input, Spin, Result, Space, Progress, Alert, Typography } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import ReactECharts from 'echarts-for-react';
+import { marked } from 'marked';
 import styles from './index.less';
+import { Document, Packer, Paragraph as DocxParagraph, TextRun } from 'docx';
+import { saveAs } from 'file-saver';
 
 const { Dragger } = Upload;
 const { TextArea } = Input;
 const { Title, Paragraph } = Typography;
+
+interface AnalysisResponse {
+  id: string;
+  choices: {
+    message: {
+      content: string;
+    };
+  }[];
+}
+
+
+interface ReportSection {
+  title: string;
+  content: string;
+}
+
+interface ReportData {
+  title: string;
+  summary: string;
+  sections: ReportSection[];
+  charts: any[];
+  markdown: string;
+}
 
 const ReportPage: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -23,94 +49,158 @@ const ReportPage: React.FC = () => {
   const handleUpload = async (file: File) => {
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      // 模拟上传进度
-      const timer = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 99) {
-            clearInterval(timer);
-            return 99;
-          }
-          return prev + 10;
-        });
-      }, 200);
+      // 读取文件为 base64
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const base64Image = reader.result as string;
+        
+        // 调用 NewAPI 接口
+        try {
+          const response = await fetch('https://aizex.top/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o',
+              messages: [
+                {
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'text',
+                      text: '请分析这张图表中的数据趋势和关键信息，并给出专业的分析见解。'
+                    },
+                    {
+                      type: 'image_url',
+                      image_url: {
+                        url: base64Image
+                      }
+                    }
+                  ]
+                }
+              ],
+              max_tokens: 1000
+            })
+          });
 
-      // 模拟预览数据
-      setTimeout(() => {
-        setPreviewData({
-          columns: ['日期', '销售额', '利润'],
-          data: [
-            ['2023-01', 1000, 200],
-            ['2023-02', 1500, 300],
-            ['2023-03', 1200, 250],
-          ]
-        });
-        setProgress(100);
-        message.success('文件上传成功');
-        setCurrentStep(1);
-        setLoading(false);
-        clearInterval(timer);
-      }, 2000);
+          const data: AnalysisResponse = await response.json();
+          
+          setPreviewData({
+            columns: ['分析结果'],
+            data: [[data.choices[0].message.content]]
+          });
+          
+          message.success('图片分析成功');
+          setCurrentStep(1);
+        } catch (error) {
+          message.error('图片分析失败');
+          console.error('API调用失败:', error);
+        }
+      };
     } catch (error) {
-      message.error('文件上传失败');
+      message.error('文件处理失败');
+    } finally {
       setLoading(false);
     }
   };
 
+  const generateWordDocument = async (markdown: string) => {
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: markdown.split('\n').map(line => {
+          if (line.startsWith('# ')) {
+            return new DocxParagraph({
+              text: line.replace('# ', ''),
+              heading: 'Heading1'
+            });
+          }
+          if (line.startsWith('## ')) {
+            return new DocxParagraph({
+              text: line.replace('## ', ''),
+              heading: 'Heading2'
+            });
+          }
+          return new DocxParagraph({
+            children: [
+              new TextRun({
+                text: line,
+                size: 24
+              })
+            ]
+          });
+        })
+      }
+    ]
+  });
+
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, '数据分析报告.docx');
+};
+
+const handleDownload = async () => {
+  if (reportData?.markdown) {
+    try {
+      await generateWordDocument(reportData.markdown);
+      message.success('报告下载成功');
+    } catch (error) {
+      message.error('报告下载失败');
+      console.error('下载失败:', error);
+    }
+  }
+};
+
   const generateReport = async () => {
     setLoading(true);
     try {
-      let progress = 0;
-      const timer = setInterval(() => {
-        progress += 20;
-        if (progress <= 100) {
-          setProgress(progress);
-        }
-      }, 1000);
-  
-      setTimeout(() => {
-        clearInterval(timer);
-        setProgress(100);
-        setWordUrl('https://example.com/report.docx');
-        setReportData({
-          title: '数据分析报告',
-          summary: '根据您提供的数据，我们生成了详细的分析报告...',
-          charts: [
+      const response = await fetch('https://aizex.top/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
             {
-              title: '销售趋势',
-              type: 'line',
-              data: {
-                title: {
-                  text: '销售趋势分析'
-                },
-                tooltip: {
-                  trigger: 'axis'
-                },
-                xAxis: {
-                  type: 'category',
-                  data: ['1月', '2月', '3月']
-                },
-                yAxis: {
-                  type: 'value'
-                },
-                series: [{
-                  name: '销售额',
-                  type: 'line',
-                  data: [1000, 1500, 1200],
-                  smooth: true
-                }]
-              }
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `请基于以下分析目标和数据，生成一份详细的markdown格式分析报告，包含标题、概述、详细分析等章节：${goal}\n${previewData?.data[0][0]}`
+                }
+              ]
             }
-          ]
-        });
-        message.success('报告生成成功');
-        setCurrentStep(2);
-        setLoading(false);
-      }, 5000);
+          ],
+          max_tokens: 2000
+        })
+      });
+
+      const data: AnalysisResponse = await response.json();
+      const markdownContent = data.choices[0].message.content;
+      
+      // 解析 markdown 内容
+      const titleMatch = markdownContent.match(/^#\s+(.+)$/m);
+      const title = titleMatch ? titleMatch[1] : '数据分析报告';
+      
+      setReportData({
+        title,
+        summary: '',
+        sections: [],
+        charts: [],
+        markdown: markdownContent
+      });
+
+      setWordUrl('https://example.com/report.docx');
+      message.success('报告生成成功');
+      setCurrentStep(2);
     } catch (error) {
       message.error('报告生成失败');
+    } finally {
       setLoading(false);
     }
   };
@@ -141,6 +231,17 @@ const ReportPage: React.FC = () => {
     );
   };
 
+  const renderReport = () => {
+    if (!reportData?.markdown) return null;
+    
+    return (
+      <div 
+        className={styles.reportContent}
+        dangerouslySetInnerHTML={{ __html: marked(reportData.markdown) }}
+      />
+    );
+  };
+
   const steps = [
     {
       title: '上传文件',
@@ -157,14 +258,14 @@ const ReportPage: React.FC = () => {
           <Dragger
             fileList={fileList}
             beforeUpload={(file) => {
-              const isExcelOrCsv =
-                file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-                file.type === 'application/vnd.ms-excel' ||
-                file.type === 'text/csv';
-              if (!isExcelOrCsv) {
-                message.error('只支持上传 Excel 或 CSV 文件！');
-                return false;
-              }
+              // const isExcelOrCsv =
+              //   file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+              //   file.type === 'application/vnd.ms-excel' ||
+              //   file.type === 'text/csv';
+              // if (!isExcelOrCsv) {
+              //   message.error('只支持上传 Excel 或 CSV 文件！');
+              //   return false;
+              // }
               setFileList([file]);
               handleUpload(file);
               return false;
@@ -242,7 +343,7 @@ const ReportPage: React.FC = () => {
                 <Button
                   type="primary"
                   icon={<FileWordOutlined />}
-                  onClick={() => window.open(wordUrl)}
+                  onClick={handleDownload}
                   key="download"
                   size="large"
                 >
@@ -264,17 +365,7 @@ const ReportPage: React.FC = () => {
                 </Button>,
               ]}
             />
-            {reportData && (
-              <div className={styles.reportPreview}>
-                <Title level={4}>{reportData.title}</Title>
-                <Paragraph>{reportData.summary}</Paragraph>
-                {reportData.charts.map((chart: any, index: number) => (
-                  <Card key={index} title={chart.title} className={styles.chartCard}>
-                    <ReactECharts option={chart.data} style={{ height: 300 }} />
-                  </Card>
-                ))}
-              </div>
-            )}
+            {renderReport()}
           </Card>
         </div>
       ),
@@ -283,8 +374,8 @@ const ReportPage: React.FC = () => {
 
   return (
     <PageContainer
-      title="智能报告生成"
-      subTitle="上传数据文件，快速生成专业分析报告"
+      title="智能图表分析"
+      subTitle="上传数据图表，快速获取专业分析见解"
     >
       <Card className={styles.container}>
         <Steps
@@ -299,5 +390,7 @@ const ReportPage: React.FC = () => {
     </PageContainer>
   );
 };
+
+
 
 export default ReportPage;
