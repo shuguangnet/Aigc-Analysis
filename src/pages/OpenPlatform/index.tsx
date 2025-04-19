@@ -7,7 +7,7 @@ const OpenPlatform: React.FC = () => {
   const [keyList] = useState([
     {
       id: 1,
-      accessKey: 'sk-1PBIyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXGh5S',
+      accessKey: 'sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY',
       description: 'GPT-3.5-Turbo API，支持中英文对话，适合日常对话场景',
       status: 'active',
       qps: '3次/秒',

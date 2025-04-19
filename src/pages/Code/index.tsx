@@ -70,11 +70,11 @@ const CodeAnalysisPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch('http://62.106.70.89:3000/v1/chat/completions', {
+      const response = await fetch('http://8.218.106.190:3000/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-1PBIyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXGh5S'
+          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
         },
         body: JSON.stringify({
           model: 'deepseek-chat',
