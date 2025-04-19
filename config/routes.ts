@@ -7,7 +7,7 @@ export default [
 
   { path: '/home', name :"首页", icon: "PieChartOutlined", component: './HomePage' },
   { path: '/add_chart', name :"智能分析", icon: "barChart", component: './AddChart' },
-  { path: '/add_async', name: "智能分析(异步)", icon: "DotChartOutlined", component: './AddChartAsync' },
+  { path: '/add_async', name: "异步分析", icon: "DotChartOutlined", component: './AddChartAsync' },
   { path: '/report', name: "报告中心", icon: "commentOutlined", component: './Report' },
   { path: '/code', name: "代码分析", icon: "GithubOutlined", component: './Code' },
   { path: '/Forecast', name :"分析中心", icon: "ApiOutlined", component: './Forecast' },

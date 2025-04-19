@@ -70,7 +70,7 @@ const CodeAnalysisPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch('https://aizex.top/v1/chat/completions', {
+      const response = await fetch('https://a1.aizex.me/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
