@@ -98,14 +98,14 @@ const ReportPage: React.FC = () => {
 
   const analyzeData = async (content: any) => {
     try {
-      const response = await fetch('https://a1.aizex.me/v1/chat/completions', {
+      const response = await fetch('http://62.106.70.89:3000/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
+          'Authorization': 'Bearer sk-1PBIyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXGh5S'
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'deepseek-chat',
           messages: [
             {
               role: 'user',
@@ -189,14 +189,14 @@ const handleDownload = async () => {
   const generateReport = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://a1.aizex.me/v1/chat/completions', {
+      const response = await fetch('http://62.106.70.89:3000/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-Bp4AtAw19a6lENrPUQeqfiS9KP46Z5A43j4QkNeX4NRnGKMU'
+          'Authorization': 'Bearer sk-1PBIyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXGh5S'
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'deepseek-chat',
           messages: [
             {
               role: 'user',
