@@ -70,7 +70,7 @@ const CodeAnalysisPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch('http://8.218.106.190:3000/v1/chat/completions', {
+      const response = await fetch('https://openai.933999.xyz/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
