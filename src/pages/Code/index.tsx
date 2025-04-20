@@ -77,7 +77,7 @@ const CodeAnalysisPage: React.FC = () => {
           'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
         },
         body: JSON.stringify({
-          model: 'deepseek-ai/DeepSeek-R1',
+          model: 'gpt-4o-mini',
           messages: [
             {
               role: 'user',
