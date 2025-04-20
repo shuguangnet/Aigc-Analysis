@@ -28,6 +28,7 @@ import ReactECharts from 'echarts-for-react';
 import styles from './index.less';
 import * as XLSX from 'xlsx';
 import { marked } from 'marked';
+import useAIRequest from '@/hooks/useAIRequest';
 
 const { Dragger } = Upload;
 const { TextArea } = Input;
@@ -105,7 +106,9 @@ const AnalysisCenter: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-    const handleSend = async () => {
+  const { loading: aiLoading, sendRequest } = useAIRequest();
+
+  const handleSend = async () => {
     if (!inputValue.trim()) return;
 
     const userMessage: Message = {
@@ -119,46 +122,27 @@ const AnalysisCenter: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('https://openai.933999.xyz/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: '你是一个数据分析专家，请根据用户输入进行分析并生成分析报告和 ECharts 图表配置。图表配置需要包含在 ```json 代码块中。'
-            },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: `请对以下内容进行${analysisOptions.find(opt => opt.value === analysisType)?.label}，并给出专业的分析见解。
-                分析报告之后，请生成一个用于可视化的 ECharts 配置对象（使用 \`\`\`json 包裹），配置中需要包含：
-                1. 标题、图例、提示框等基本配置
-                2. 合适的图表类型（折线图、柱状图、饼图等）
-                3. 坐标轴配置（如果适用）
-                4. 数据系列配置
-                5. 主题色彩配置
+      const content = await sendRequest([
+        {
+          type: 'text',
+          text: `请对以下内容进行${analysisOptions.find(opt => opt.value === analysisType)?.label}，并给出专业的分析见解。
+          分析报告之后，请生成一个用于可视化的 ECharts 配置对象（使用 \`\`\`json 包裹），配置中需要包含：
+          1. 标题、图例、提示框等基本配置
+          2. 合适的图表类型（折线图、柱状图、饼图等）
+          3. 坐标轴配置（如果适用）
+          4. 数据系列配置
+          5. 主题色彩配置
 
-                分析内容：${inputValue}`
-                }
-              ]
-            }
-          ],
-          max_tokens: 2000
-        })
+          分析内容：${inputValue}`
+        }
+      ], {
+        systemPrompt: '你是一个数据分析专家，请根据用户输入进行分析并生成分析报告和 ECharts 图表配置。图表配置需要包含在 ```json 代码块中。'
       });
 
-      const result = await response.json();
       let chartOption;
       
       try {
-        const matches = result.choices[0].message.content.match(/```json\n([\s\S]*?)\n```/);
+        const matches = content.match(/```json\n([\s\S]*?)\n```/);
         if (matches && matches[1]) {
           chartOption = JSON.parse(matches[1]);
         }
@@ -169,7 +153,7 @@ const AnalysisCenter: React.FC = () => {
 
       const assistantMessage: Message = {
         type: 'assistant',
-        content: result.choices[0].message.content.replace(/```json\n[\s\S]*?\n```/g, '').trim(),
+        content: content.replace(/```json\n[\s\S]*?\n```/g, '').trim(),
         timestamp: Date.now(),
         charts: chartOption,
       };
@@ -181,7 +165,7 @@ const AnalysisCenter: React.FC = () => {
       message.error('分析请求失败');
       setLoading(false);
     }
-  }
+  };
 
 
   const handleFileAnalysis = async (file: File) => {

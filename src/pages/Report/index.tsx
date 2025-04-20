@@ -8,6 +8,7 @@ import styles from './index.less';
 import { Document, Packer, Paragraph as DocxParagraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
+import useAIRequest from '@/hooks/useAIRequest';
 
 const { Dragger } = Upload;
 const { TextArea } = Input;
@@ -96,37 +97,22 @@ const ReportPage: React.FC = () => {
     }
   };
 
-  const analyzeData = async (content: any) => {
-    try {
-      const response = await fetch('https://openai.933999.xyz/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: '请分析这些数据的趋势和关键信息，并给出专业的分析见解。'
-                },
-                content
-              ]
-            }
-          ],
-          max_tokens: 1000
-        })
-      });
+  const { loading: aiLoading, sendRequest } = useAIRequest();
 
-      const data: AnalysisResponse = await response.json();
+  const analyzeData = async (content: any) => {
+    setLoading(true);
+    try {
+      const result = await sendRequest([
+        {
+          type: 'text',
+          text: '请分析这些数据的趋势和关键信息，并给出专业的分析见解。'
+        },
+        content
+      ]);
       
       setPreviewData({
         columns: ['分析结果'],
-        data: [[data.choices[0].message.content]]
+        data: [[result]]
       });
       
       message.success('数据分析成功');
@@ -135,7 +121,38 @@ const ReportPage: React.FC = () => {
       message.error('数据分析失败');
       console.error('API调用失败:', error);
     } finally {
-      setLoading(false);
+    setLoading(false);
+  }
+  };
+
+  const generateReport = async () => {
+    try {
+      const result = await sendRequest([
+        {
+          type: 'text',
+          text: `请基于以下分析目标和数据，生成一份详细的markdown格式分析报告，包含标题、概述、详细分析等章节：${goal}\n${previewData?.data[0][0]}`
+        }
+      ], {
+        maxTokens: 2000
+      });
+      
+      // 解析 markdown 内容
+      const titleMatch = result.match(/^#\s+(.+)$/m);
+      const title = titleMatch ? titleMatch[1] : '数据分析报告';
+      
+      setReportData({
+        title,
+        summary: '',
+        sections: [],
+        charts: [],
+        markdown: result
+      });
+
+      setWordUrl('https://example.com/report.docx');
+      message.success('报告生成成功');
+      setCurrentStep(2);
+    } catch (error) {
+      message.error('报告生成失败');
     }
   };
 
@@ -185,57 +202,6 @@ const handleDownload = async () => {
     }
   }
 };
-
-  const generateReport = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('https://openai.933999.xyz/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: `请基于以下分析目标和数据，生成一份详细的markdown格式分析报告，包含标题、概述、详细分析等章节：${goal}\n${previewData?.data[0][0]}`
-                }
-              ]
-            }
-          ],
-          max_tokens: 2000
-        })
-      });
-
-      const data: AnalysisResponse = await response.json();
-      const markdownContent = data.choices[0].message.content;
-      
-      // 解析 markdown 内容
-      const titleMatch = markdownContent.match(/^#\s+(.+)$/m);
-      const title = titleMatch ? titleMatch[1] : '数据分析报告';
-      
-      setReportData({
-        title,
-        summary: '',
-        sections: [],
-        charts: [],
-        markdown: markdownContent
-      });
-
-      setWordUrl('https://example.com/report.docx');
-      message.success('报告生成成功');
-      setCurrentStep(2);
-    } catch (error) {
-      message.error('报告生成失败');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const renderPreview = () => {
     if (!previewData) return null;

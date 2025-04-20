@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { PageContainer } from '@ant-design/pro-components';
-import {  CopyOutlined, DownloadOutlined } from '@ant-design/icons';
+import { CopyOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Upload, Card, Button, Tabs, message, Radio, Space, Tooltip } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import Mermaid from '@/components/Mermaid';
 import MonacoEditor from '@/components/MonacoEditor';
 import html2canvas from 'html2canvas';
+import useAIRequest from '@/hooks/useAIRequest';
 
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
@@ -28,86 +29,64 @@ const CodeAnalysisPage: React.FC = () => {
   const [codeContent, setCodeContent] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('editor');
 
-  // 处理代码编辑
   const handleCodeChange = (value: string) => {
     setCodeContent(value);
   };
 
   const handleExportDiagram = async () => {
-  try {
-    const chartElement = document.querySelector('.mermaid') as HTMLElement;
-    if (!chartElement) {
-      message.warning('未找到图表元素');
-      return;
+    try {
+      const chartElement = document.querySelector('.mermaid') as HTMLElement;
+      if (!chartElement) {
+        message.warning('未找到图表元素');
+        return;
+      }
+
+      const canvas = await html2canvas(chartElement, {
+        useCORS: true,
+        scale: 2,
+        backgroundColor: '#ffffff'
+      });
+
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `diagram_${new Date().getTime()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      message.success('导出成功');
+    } catch (error) {
+      console.error('导出失败:', error);
+      message.error('导出失败，请重试');
     }
-
-    const canvas = await html2canvas(chartElement, {
-      useCORS: true,
-      scale: 2, // 提高导出图片质量
-      backgroundColor: '#ffffff'
-    });
-
-    const image = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = image;
-    link.download = `diagram_${new Date().getTime()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    message.success('导出成功');
-  } catch (error) {
-    console.error('导出失败:', error);
-    message.error('导出失败，请重试');
-  }
   };
-  
-  // 处理代码分析
+
+  const { loading: aiLoading, sendRequest } = useAIRequest();
+
   const handleAnalyze = async () => {
     if (!codeContent.trim()) {
       message.warning('请输入或上传代码');
       return;
     }
-    setLoading(true);
-    try {
-      const response = await fetch('https://openai.933999.xyz/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: analysisType === 'er' 
-                    ? '请分析这段代码并生成对应的ER图，使用mermaid语法,用于计算机科学与技术毕业论文。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
-                    : '请分析这段代码并生成功能模块图，使用mermaid语法,用于计算机科学与技术毕业论文。。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
-                },
-                {
-                  type: 'text',
-                  text: codeContent
-                }
-              ]
-            }
-          ],
-          max_tokens: 2000
-        })
-      });
 
-      const data: AnalysisResponse = await response.json();
-      const content = data.choices[0].message.content;
-      
-      // 解析返回的内容，提取 mermaid 图表代码和分析建议
+    try {
+      const content = await sendRequest([
+        {
+          type: 'text',
+          text: analysisType === 'er' 
+            ? '请分析这段代码并生成对应的ER图，使用mermaid语法,用于计算机科学与技术毕业论文。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
+            : '请分析这段代码并生成功能模块图，使用mermaid语法,用于计算机科学与技术毕业论文。。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
+        },
+        {
+          type: 'text',
+          text: codeContent
+        }
+      ]);
+
       const [diagramPart, analysisPart] = content.split('分析建议：').map(part => part.trim());
-      
-      // 提取 mermaid 代码块
       const mermaidCode = diagramPart.match(/```mermaid\n([\s\S]*?)\n```/)?.[1] || diagramPart;
-      
+
       setDiagramCode(mermaidCode);
       setAnalysisResult(analysisPart || '暂无具体分析建议');
       setActiveTab('result');
@@ -115,27 +94,24 @@ const CodeAnalysisPage: React.FC = () => {
     } catch (error) {
       console.error('分析失败:', error);
       message.error('分析失败，请重试');
-    } finally {
-      setLoading(false);
     }
   };
 
-  // 处理文件上传
   const handleUpload = async (file: File) => {
-    setLoading(true);
     try {
-      // 读取文件内容
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
         setCodeContent(content);
         setActiveTab('editor');
+        message.success('文件上传成功');
       };
       reader.readAsText(file);
+      return false; // 阻止默认上传行为
     } catch (error) {
       message.error('文件读取失败');
+      console.error('文件读取失败:', error);
     }
-    setLoading(false);
   };
 
   return (
@@ -176,7 +152,7 @@ const CodeAnalysisPage: React.FC = () => {
                     >
                       <Button>上传文件</Button>
                     </Dragger>
-                    <Button type="primary" onClick={handleAnalyze} loading={loading}>
+                    <Button type="primary" onClick={handleAnalyze} loading={aiLoading}>
                       开始分析
                     </Button>
                   </Space>
