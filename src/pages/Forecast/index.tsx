@@ -126,7 +126,7 @@ const AnalysisCenter: React.FC = () => {
           'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
+          model: 'deepseek-ai/DeepSeek-R1',
           messages: [
             {
               role: 'system',
@@ -208,7 +208,7 @@ const AnalysisCenter: React.FC = () => {
             'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
           },
           body: JSON.stringify({
-            model: 'deepseek-chat',
+            model: 'deepseek-ai/DeepSeek-R1',
             messages: [
               {
                 role: 'system',
