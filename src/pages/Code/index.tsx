@@ -11,17 +11,8 @@ import useAIRequest from '@/hooks/useAIRequest';
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
 
-interface AnalysisResponse {
-  id: string;
-  choices: {
-    message: {
-      content: string;
-    };
-  }[];
-}
 
 const CodeAnalysisPage: React.FC = () => {
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [analysisType, setAnalysisType] = useState<'er' | 'module'>('er');
   const [analysisResult, setAnalysisResult] = useState<string>('');
@@ -71,40 +62,12 @@ const CodeAnalysisPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch('http://8.218.106.190:3000/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: analysisType === 'er' 
-                    ? '请分析这段代码并生成对应的ER图，使用mermaid语法,用于计算机科学与技术毕业论文。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
-                    : '请分析这段代码并生成数据流图，使用mermaid语法,用于计算机科学与技术毕业论文。。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
-                },
-                {
-                  type: 'text',
-                  text: codeContent
-                }
-              ]
-            }
-          ],
-          max_tokens: 2000
-        })
-      });
+      // 删除未使用的 fetch 请求代码
 
-    try {
       const content = await sendRequest([
         {
           type: 'text',
-          text: analysisType === 'er' 
+          text: analysisType === 'er'
             ? '请分析这段代码并生成对应的ER图，使用mermaid语法,用于计算机科学与技术毕业论文。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
             : '请分析这段代码并生成功能模块图，使用mermaid语法,用于计算机科学与技术毕业论文。。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
         },
@@ -124,6 +87,8 @@ const CodeAnalysisPage: React.FC = () => {
     } catch (error) {
       console.error('分析失败:', error);
       message.error('分析失败，请重试');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,7 +117,6 @@ const CodeAnalysisPage: React.FC = () => {
             value={analysisType}
             onChange={(e) => {
               setAnalysisType(e.target.value);
-              setFileList([]);
               setDiagramCode('');
               setAnalysisResult('');
             }}
@@ -199,7 +163,7 @@ const CodeAnalysisPage: React.FC = () => {
                   <Card title="可视化图表" extra={
                     <Space>
                       <Tooltip title="复制图表代码">
-                        <Button 
+                        <Button
                           icon={<CopyOutlined />}
                           onClick={() => {
                             navigator.clipboard.writeText(diagramCode);
