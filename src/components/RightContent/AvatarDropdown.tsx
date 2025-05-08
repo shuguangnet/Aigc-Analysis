@@ -16,6 +16,7 @@ export type GlobalHeaderRightProps = {
 
 export const AvatarName = () => {
   const { initialState } = useModel('@@initialState');
+  console.log('initialState',initialState)
   const { currentUser } = initialState || {};
   return <span className="anticon">{currentUser?.userName}</span>;
 };
@@ -38,7 +39,7 @@ const useStyles = createStyles(({ token }) => {
   };
 });
 
-export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, children }) => {
+export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, children,currentUser }) => {
   /**
    * 退出登录，并且将当前的 url 保存
    */
@@ -93,7 +94,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     return loading;
   }
 
-  const { currentUser } = initialState;
+  // const { currentUser } = initialState;
 
   if (!currentUser || !currentUser.userName) {
     return loading;

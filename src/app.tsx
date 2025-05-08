@@ -1,3 +1,4 @@
+import React from 'react';
 import { AvatarDropdown, AvatarName, Footer, Question } from '@/components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
@@ -36,13 +37,26 @@ export async function getInitialState(): Promise<{
 
 
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+
+  const [data,setData]=React.useState("")
+
+  const fetchData=(async ()=>{
+    const res = await getLoginUserUsingGet();
+    console.log('data',res)
+    setData(res)
+  })
+  
+  React.useEffect(()=>{
+    fetchData()
+  },[])
+
   return {
     actionsRender: () => [<Question key="doc" />],
     avatarProps: {
       src: initialState?.currentUser?.userAvatar,
       title: <AvatarName />,
       render: (_, avatarChildren) => {
-        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
+        return <AvatarDropdown currentUser={data}>{avatarChildren}</AvatarDropdown>;
       },
     },
     waterMarkProps: {
