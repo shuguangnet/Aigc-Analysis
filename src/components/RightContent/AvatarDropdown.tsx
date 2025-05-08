@@ -41,24 +41,23 @@ const useStyles = createStyles(({ token }) => {
 });
 
 export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, children }) => {
-  const { initialState, setInitialState, refresh } = useModel('@@initialState');
-console.log('initialState',initialState)
-  // 监听路由变化，并且将当前的 url 保存到 localstorage 中
-  // 监听路由变化，并且将当前的 url 保存到 localstorage 中
-  // 监听路由变化，并且将当前的 url 保存到 localstorage 中
-  // 添加 useEffect 来监听路由变化和初始化
-  useEffect(() => {
-    if (!initialState?.currentUser && window.location.pathname !== '/user/login') {
-      console.log('loginPath',window.location.pathname)
-      refresh();
-    }
-  }, []);
+  const { initialState, setInitialState } = useModel('@@initialState');
+  // 移除 useEffect 里的 window.location.reload 相关逻辑
+  // useEffect(() => {
+  //   console.log('initialState2',sessionStorage.getItem('avatar_refreshed'))
+  //   if (!sessionStorage.getItem('avatar_refreshed')) {
+  //     sessionStorage.setItem('avatar_refreshed', '1');
+  //     window.location.reload();
+  //   }
+  // }, []);
 
   /**
    * 退出登录，并且将当前的 url 保存
    */
   const loginOut = async () => {
     await userLogoutUsingPost();
+    // 退出登录时清除刷新标记
+    sessionStorage.removeItem('avatar_refreshed'); 
     const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;
     /** redirect */

@@ -93,10 +93,15 @@ useEffect(()=>{
         const defaultLoginSuccessMessage = '登录成功！';
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
+        // 登录成功后，设置刷新标记并刷新页面
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');
+        sessionStorage.setItem('avatar_refreshed', '1');
+         setTimeout(() => {
+          window.location.reload();
+        }, 1000);
         return;
-      }else{
+      } else {
         message.error(res.message);
       }
     } catch (error) {
@@ -104,6 +109,7 @@ useEffect(()=>{
       console.log(error);
       message.error(defaultLoginFailureMessage);
     }
+    // 登录失败不需要刷新
   }; 
  
   return (
