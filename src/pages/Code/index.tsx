@@ -69,6 +69,36 @@ const CodeAnalysisPage: React.FC = () => {
       message.warning('请输入或上传代码');
       return;
     }
+    setLoading(true);
+    try {
+      const response = await fetch('http://8.218.106.190:3000/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: analysisType === 'er' 
+                    ? '请分析这段代码并生成对应的ER图，使用mermaid语法,用于计算机科学与技术毕业论文。分析要点：1. 实体关系 2. 属性定义 3. 关系类型'
+                    : '请分析这段代码并生成数据流图，使用mermaid语法,用于计算机科学与技术毕业论文。。分析要点：1. 模块划分 2. 依赖关系 3. 调用流程'
+                },
+                {
+                  type: 'text',
+                  text: codeContent
+                }
+              ]
+            }
+          ],
+          max_tokens: 2000
+        })
+      });
 
     try {
       const content = await sendRequest([
@@ -128,7 +158,7 @@ const CodeAnalysisPage: React.FC = () => {
             }}
           >
             <Radio.Button value="er">ER图生成</Radio.Button>
-            <Radio.Button value="module">功能模块图</Radio.Button>
+            <Radio.Button value="module">数据流图</Radio.Button>
           </Radio.Group>
 
           <Tabs activeKey={activeTab} onChange={setActiveTab}>

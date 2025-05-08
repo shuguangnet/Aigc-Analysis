@@ -76,6 +76,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     [setInitialState],
   );
 
+
   const loading = (
     <span className={styles.action}>
       <Spin

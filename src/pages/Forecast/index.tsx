@@ -48,8 +48,7 @@ const AnalysisCenter: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-  const analysisOptions = [
-    { value: 'predictive', label: '预测性分析', icon: <LineChartOutlined />, color: '#1890ff' },
+  const analysisOptions = [ 
     { value: 'descriptive', label: '描述性统计', icon: <BarChartOutlined />, color: '#52c41a' },
     { value: 'anomaly', label: '异常检测', icon: <PieChartOutlined />, color: '#faad14' },
     { value: 'quality', label: '数据质量分析', icon: <AreaChartOutlined />, color: '#722ed1' },
