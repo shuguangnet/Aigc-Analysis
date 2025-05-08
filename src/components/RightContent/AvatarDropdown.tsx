@@ -8,6 +8,7 @@ import React, { useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
 import { userLogoutUsingPost } from '@/services/hebi/userController';
+import { useEffect } from 'react';
 
 export type GlobalHeaderRightProps = {
   menu?: boolean;
@@ -39,7 +40,20 @@ const useStyles = createStyles(({ token }) => {
   };
 });
 
-export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, children,currentUser }) => {
+export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, children }) => {
+  const { initialState, setInitialState, refresh } = useModel('@@initialState');
+console.log('initialState',initialState)
+  // 监听路由变化，并且将当前的 url 保存到 localstorage 中
+  // 监听路由变化，并且将当前的 url 保存到 localstorage 中
+  // 监听路由变化，并且将当前的 url 保存到 localstorage 中
+  // 添加 useEffect 来监听路由变化和初始化
+  useEffect(() => {
+    if (!initialState?.currentUser && window.location.pathname !== '/user/login') {
+      console.log('loginPath',window.location.pathname)
+      refresh();
+    }
+  }, []);
+
   /**
    * 退出登录，并且将当前的 url 保存
    */
@@ -60,7 +74,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
   };
   const { styles } = useStyles();
 
-  const { initialState, setInitialState } = useModel('@@initialState');
+  // const { initialState, setInitialState } = useModel('@@initialState');
 
   const onMenuClick = useCallback(
     (event: MenuInfo) => {
@@ -90,13 +104,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     </span>
   );
 
-  if (!initialState) {
-    return loading;
-  }
-
-  // const { currentUser } = initialState;
-
-  if (!currentUser || !currentUser.userName) {
+  if (!initialState?.currentUser || !initialState.currentUser.userName) {
     return loading;
   }
 

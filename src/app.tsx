@@ -23,6 +23,7 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+
   // 如果不是登录页面，执行
   const { location } = history;
   if (location.pathname !== loginPath) {
@@ -32,31 +33,18 @@ export async function getInitialState(): Promise<{
     };
   }
   return {
+    currentUser: undefined,
   };
 }
 
-
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
-
-  const [data,setData]=React.useState("")
-
-  const fetchData=(async ()=>{
-    const res = await getLoginUserUsingGet();
-    console.log('data',res)
-    setData(res)
-  })
-  
-  React.useEffect(()=>{
-    fetchData()
-  },[])
-
   return {
     actionsRender: () => [<Question key="doc" />],
     avatarProps: {
       src: initialState?.currentUser?.userAvatar,
       title: <AvatarName />,
       render: (_, avatarChildren) => {
-        return <AvatarDropdown currentUser={data}>{avatarChildren}</AvatarDropdown>;
+        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
     },
     waterMarkProps: {
@@ -125,8 +113,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const request = {
-  
-  baseURL:"http://localhost:8101",
+
+  baseURL:"http://172.20.10.2:8101",
   withCredentials:true,
   ...errorConfig,
 };
