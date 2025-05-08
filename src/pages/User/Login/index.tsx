@@ -97,9 +97,7 @@ useEffect(()=>{
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');
         sessionStorage.setItem('avatar_refreshed', '1');
-         setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        window.location.href = urlParams.get('redirect') || '/';
         return;
       } else {
         message.error(res.message);
