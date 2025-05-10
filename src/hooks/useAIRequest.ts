@@ -18,7 +18,7 @@ const useAIRequest = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer sk-mw9ekhJlSj3GeGiw0hLRSHlwdkDFst8q6oBfQrW0L15QilbY'
+          'Authorization': 'Bearer sk-1PBIyxIdJ42yyC11XRNqbEXYDt2eZRNVNbd8XxmKjnPXGh5S'
         },
         body: JSON.stringify({
           model: options.model || 'gpt-4o-mini',
