@@ -147,6 +147,7 @@ const ForumDetail: React.FC = () => {
         <header style={{ marginBottom: 24 }}>
           <Title level={2}>{post?.title || '帖子标题'}</Title>
           <Space split={<Divider type="vertical" />}>
+            
             <Space>
               <Avatar src={post?.user?.userAvatar || 'https://joeschmoe.io/api/v1/random'} />
               <span>{post?.user?.userName || '无'}</span>
@@ -157,7 +158,16 @@ const ForumDetail: React.FC = () => {
             {post?.tagList?.map((tag: string) => (
               <Tag color="blue" key={tag}>{tag}</Tag>
             ))}
-            
+            {isMyPost && (
+              <Button 
+                type="text" 
+                onClick={() => {
+                  window.location.href = `/forum/publish?id=${id}`;  // 使用 window.location.href 进行跳转
+                }}
+              >
+                修改
+              </Button>
+            )}
           </Space>
         </header>
 
@@ -182,16 +192,7 @@ const ForumDetail: React.FC = () => {
             >
               收藏 {post?.favourNum ?? 0}
             </Button>
-            {isMyPost && (
-              <Button 
-                type="primary" 
-                onClick={() => {
-                  window.location.href = `/forum/publish?id=${id}`;  // 使用 window.location.href 进行跳转
-                }}
-              >
-                修改
-              </Button>
-            )}
+            
             <Button icon={<ShareAltOutlined />}>
               分享
             </Button>
