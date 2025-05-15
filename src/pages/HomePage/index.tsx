@@ -12,9 +12,28 @@ import {
   ClockCircleOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
+import { getWeekChartSuccessCountUsingGet, getTodayChartCountUsingGet, countChartsUsingGet } from '@/services/hebi/chartController'; 
+import { countUsersUsingGet } from '@/services/hebi/userController';
+import { getChartGenerationStatsUsingGet } from '@/services/hebi/chartController'; // 新增
 
 const HomePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
+
+  // 新增：总图表数
+  const [totalCharts, setTotalCharts] = useState<number>(0);
+
+  // 新增：今日生成数量
+  const [todayGenerated, setTodayGenerated] = useState<number>(0);
+
+  // 新增：本周折线图数据
+  const [weekChartData, setWeekChartData] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
+
+   // 新增：总用户数
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+
+  const [successRate, setSuccessRate] = useState<number>(0);
+  
+  const [avgGenerationTime, setAvgGenerationTime] = useState<number>(0);
 
   // 统计数据
   const [statisticsData] = useState({
@@ -36,6 +55,51 @@ const HomePage: React.FC = () => {
   
   // ECharts准备的数据
   const chartTypesForEcharts = chartTypes.map(({ value, name }) => ({ value, name }));
+
+  // 拉取本周数据
+  useEffect(() => {
+    getWeekChartSuccessCountUsingGet().then(res => {
+      if (res && res.code === 0 ) {
+        setWeekChartData(res?.data);
+      }
+    });
+    getTodayChartCountUsingGet().then(res => {
+      if (res && res.code === 0 ) {
+        setTodayGenerated(res?.data);
+      }
+    });
+    // 获取总图表数
+    countChartsUsingGet().then(res => {
+      if (res && res.code === 0 ) {
+        setTotalCharts(res?.data);
+      }
+    });
+    // 获取总用户数
+    countUsersUsingGet().then(res => {
+      if (res && res.code === 0 ) {
+        console.log(res.data);
+        setTotalUsers(res?.data);
+      }
+    });
+    // 获取成功率
+    getChartGenerationStatsUsingGet().then(res => {
+      if (res && res.code === 0) {
+        console.log(res.data);
+        // 计算成功率（百分比，保留两位小数）
+        const successCount = Number(res.data.successRate) || 0;
+        const totalCount = Number(res.data.totalCount) || 0;
+        let rate = 0;
+        if (totalCount > 0) {
+          // rate = ((totalCharts-successCount) / totalCount) * 100;
+          rate = ((totalCount-successCount) / totalCount) * 100;
+        }
+        setSuccessRate(Number(rate.toFixed(2)));
+      }
+    });
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   const chartOptions = {
     title: {
@@ -79,7 +143,7 @@ const HomePage: React.FC = () => {
         name: '生成数量',
         type: 'line',
         smooth: true,
-        data: [15, 22, 18, 25, 20, 30, 28],
+        data: weekChartData, // 修改为动态数据
         areaStyle: {
           opacity: 0.1,
         },
@@ -139,8 +203,14 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     // 模拟数据加载
     setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+      // 随机生成0~60秒的平均生成时间
+      const randomTime = Math.floor(Math.random() * 61);
+      setAvgGenerationTime(randomTime);
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    }, []);
   }, []);
 
   return (
@@ -155,7 +225,7 @@ const HomePage: React.FC = () => {
                   <span>总图表数</span>
                 </Space>
               }
-              value={statisticsData.totalCharts}
+              value={totalCharts}
               valueStyle={{ color: '#1890ff' }}
             />
             <Progress
@@ -176,13 +246,13 @@ const HomePage: React.FC = () => {
                   <span>生成成功率</span>
                 </Space>
               }
-              value={statisticsData.successRate}
+              value={successRate}
               suffix="%"
               precision={2}
               valueStyle={{ color: '#52c41a' }}
             />
             <Progress
-              percent={statisticsData.successRate}
+              percent={successRate}
               size="small"
               status="active"
               showInfo={false}
@@ -199,7 +269,7 @@ const HomePage: React.FC = () => {
                   <span>今日生成</span>
                 </Space>
               }
-              value={statisticsData.todayGenerated}
+              value={todayGenerated}
               valueStyle={{ color: '#faad14' }}
             />
             <Progress
@@ -220,7 +290,7 @@ const HomePage: React.FC = () => {
                   <span>总用户数</span>
                 </Space>
               }
-              value={statisticsData.totalUsers}
+              value={totalUsers}
               valueStyle={{ color: '#722ed1' }}
             />
             <Progress
@@ -241,8 +311,8 @@ const HomePage: React.FC = () => {
             title="图表生成趋势"
             extra={
               <Space>
-                <Tag color="blue">周环比 +12%</Tag>
-                <Tag color="green">日环比 +5%</Tag>
+                {/* <Tag color="blue">周环比 +12%</Tag>
+                <Tag color="green">日环比 +5%</Tag> */}
               </Space>
             }
           >
@@ -273,7 +343,7 @@ const HomePage: React.FC = () => {
             <Space direction="vertical" style={{ width: '100%' }}>
               <Statistic
                 title="当前活跃用户"
-                value={statisticsData.activeUsers}
+                value={totalUsers * 0.8}
                 prefix={<UserOutlined />}
               />
               <Progress
@@ -288,12 +358,12 @@ const HomePage: React.FC = () => {
             <Space direction="vertical" style={{ width: '100%' }}>
               <Statistic
                 title="平均生成时间"
-                value={statisticsData.avgGenerationTime}
+                value={avgGenerationTime}
                 suffix="秒"
                 precision={1}
               />
               <Progress
-                percent={Math.round((2.5 / 5) * 100)}
+                percent={Math.round((avgGenerationTime / 60) * 100)}
                 status="active"
                 format={(percent) => `${percent}% 优化空间`}
               />
