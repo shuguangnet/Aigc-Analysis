@@ -1,43 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Card, Form, Input, Button, Select, message, Alert } from 'antd';
 import { history } from '@umijs/max';
 import styles from './index.less';
 import MDEditor from '@uiw/react-md-editor'; // 直接引入，不用 next/dynamic
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
-import { addPostUsingPost } from '@/services/hebi/postController';
+import { addPostUsingPost, updatePostUsingPost} from '@/services/hebi/postController';
+import { useSearchParams } from '@umijs/max'; // 新增
+import { getPostVoByIdUsingGet } from '@/services/hebi/postController'; // 新增
 
 const { TextArea } = Input;
 
 const ForumPublish: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get('id'); // 获取帖子 ID
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const [mdContent, setMdContent] = useState<string>(''); // 新增
+  const [mdContent, setMdContent] = useState<string>('');
+
+  // 如果是编辑模式，加载帖子内容
+  useEffect(() => {
+    const loadPost = async () => {
+      if (id) {
+        const res = await getPostVoByIdUsingGet({ id });
+        if (res?.code === 0 && res.data) {
+          form.setFieldsValue({
+            title: res.data.title,
+            tags: res.data.tagList,
+          });
+
+          setMdContent(res.data.content);
+        }
+      }
+    };
+    loadPost();
+  }, [id, form]);
 
   const handleSubmit = async (values: any) => {
     setSubmitting(true);
     try {
       const postAddRequest = {
+        id: id || undefined, 
         title: values.title,
-        content: mdContent, // 使用 Markdown 内容
+        content: mdContent,
         tags: values.tags || [],
       };
-      const res = await addPostUsingPost(postAddRequest);
+      const res = id ? await updatePostUsingPost(postAddRequest as any): await addPostUsingPost(postAddRequest);
       if (res && res.code === 0) {
-        message.success('发布成功');
+        message.success(id ? '修改成功' : '发布成功');
         history.push('/forum/list');
       } else {
-        message.error(res?.message || '发布失败');
+        message.error(res?.message || (id ? '修改失败' : '发布失败'));
       }
     } catch (error) {
-      message.error('发布失败');
+      message.error(id ? '修改失败' : '发布失败');
     }
     setSubmitting(false);
   };
 
   return (
     <div className={styles.publishContainer}>
-      <Card title="发布帖子" className={styles.publishCard}>
+      <Card title={id ? '修改帖子' : '发布帖子'} className={styles.publishCard}>
         <Alert
           message="发帖提示"
           description="请确保发布的内容与 AIGC 数据分析相关，并遵守社区规范。"
@@ -99,7 +122,7 @@ const ForumPublish: React.FC = () => {
               取消
             </Button>
             <Button type="primary" htmlType="submit" loading={submitting}>
-              发布帖子
+              {id ? '保存修改' : '发布帖子'}
             </Button>
           </div>
         </Form>

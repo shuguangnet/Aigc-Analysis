@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from '@umijs/max';
 import {
   Card,
@@ -19,44 +19,90 @@ import {
   StarFilled,
   ShareAltOutlined,
 } from '@ant-design/icons';
+import { getPostVoByIdUsingGet } from '@/services/hebi/postController';
+import { doThumbUsingPost } from '@/services/hebi/postThumbController';
+import { doPostFavourUsingPost } from '@/services/hebi/postFavourController';
+import dayjs from 'dayjs'; 
+import MDEditor from '@uiw/react-md-editor'; 
+import '@uiw/react-md-editor/markdown-editor.css'; 
+import '@uiw/react-markdown-preview/markdown.css'; 
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 const { TextArea } = Input;
 
-// Mock comment data
-const mockComments = [
-  {
-    id: 1,
-    author: '张三',
-    avatar: 'https://joeschmoe.io/api/v1/random',
-    content: '这个帖子很有帮助，感谢分享！',
-    createTime: '2024-03-20 10:00',
-    likes: 5,
-  },
-  {
-    id: 2,
-    author: '李四',
-    avatar: 'https://joeschmoe.io/api/v1/random',
-    content: '我也有一些补充，大家可以参考一下...',
-    createTime: '2024-03-20 11:30',
-    likes: 3,
-  },
-  {
-    id: 3,
-    author: '王五',
-    avatar: 'https://joeschmoe.io/api/v1/random',
-    content: '学到了很多新知识，期待更多分享！',
-    createTime: '2024-03-20 14:15',
-    likes: 2,
-  },
-];
+
+
+import { useModel } from '@umijs/max'; // 新增
 
 const ForumDetail: React.FC = () => {
+  const { initialState } = useModel('@@initialState'); // 获取当前登录用户信息
+  const currentUser = initialState?.currentUser;
   const { id } = useParams();
   const [liked, setLiked] = useState(false);
   const [collected, setCollected] = useState(false);
   const [comment, setComment] = useState('');
-  const [comments, setComments] = useState(mockComments);
+  // mock 评论数据
+  const [comments, setComments] = useState([
+    {
+      id: 1,
+      author: '小明',
+      avatar: 'https://joeschmoe.io/api/v1/1',
+      content: '很棒的分享，受益匪浅！',
+      createTime: '2025-05-15 10:00:00',
+      likes: 2,
+    },
+    {
+      id: 2,
+      author: 'AI助手',
+      avatar: 'https://joeschmoe.io/api/v1/2',
+      content: '请问有完整代码示例吗？',
+      createTime: '2025-05-15 11:20:00',
+      likes: 1,
+    },
+    {
+      id: 3,
+      author: '匿名用户',
+      avatar: 'https://joeschmoe.io/api/v1/random',
+      content: '期待更多相关内容！',
+      createTime: '2025-05-15 12:45:00',
+      likes: 0,
+    },
+  ]);
+
+  // 帖子详情状态
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // 拉取帖子详情
+  useEffect(() => {
+    const fetchDetail = async () => {
+      setLoading(true);
+      const res = await getPostVoByIdUsingGet({ id }); 
+      console.log('res', res);
+      if (res && res.code === 0 && res.data) {
+        setPost(res.data);
+        setLiked(!!res.data.hasThumb);      
+        setCollected(!!res.data.hasFavour); 
+      }
+      setLoading(false);
+    };
+    if (id) fetchDetail();
+  }, [id]);
+
+  // 点赞处理
+  const handleLike = async () => {
+    try {
+      const res = await doThumbUsingPost({ postId: id }); // 直接传字符串 id
+      if (res && res.code === 0) {
+        setLiked(!liked);
+        message.success(liked ? '已取消点赞' : '点赞成功');
+      } else {
+        message.error(res?.message || '操作失败');
+      }
+    } catch (e) {
+      message.error('操作失败');
+    }
+  };
 
   const handleSubmitComment = () => {
     if (!comment.trim()) {
@@ -77,46 +123,80 @@ const ForumDetail: React.FC = () => {
     setComment('');
   };
 
+  // 收藏处理
+  const handleFavour = async () => {
+    try {
+      const res = await doPostFavourUsingPost({ postId: id });
+      if (res && res.code === 0) {
+        setCollected(!collected);
+        message.success(collected ? '已取消收藏' : '收藏成功');
+      } else {
+        message.error(res?.message || '操作失败');
+      }
+    } catch (e) {
+      message.error('操作失败');
+    }
+  };
+
+  // 判断是否是当前用户的帖子
+  const isMyPost = currentUser?.id === post?.userId;
+
   return (
-    <Card>
+    <Card loading={loading}>
       <article>
         <header style={{ marginBottom: 24 }}>
-          <Title level={2}>帖子标题</Title>
+          <Title level={2}>{post?.title || '帖子标题'}</Title>
           <Space split={<Divider type="vertical" />}>
             <Space>
-              <Avatar src="https://joeschmoe.io/api/v1/random" />
-              <span>作者名称</span>
+              <Avatar src={post?.user?.userAvatar || 'https://joeschmoe.io/api/v1/random'} />
+              <span>{post?.user?.userName || '无'}</span>
             </Space>
-            <span>发布时间</span>
-            <Tag color="blue">分类</Tag>
-            <span>阅读 1000</span>
+            <span>
+              {post?.createTime ? dayjs(post.createTime).format('YYYY-MM-DD HH:mm:ss') : '发布时间'}
+            </span>
+            {post?.tagList?.map((tag: string) => (
+              <Tag color="blue" key={tag}>{tag}</Tag>
+            ))}
+            
           </Space>
         </header>
 
-        <Paragraph>
-          帖子内容
-        </Paragraph>
+        {/* Markdown 渲染帖子内容 */}
+        <div data-color-mode="light" style={{ background: '#fff' }}>
+          <MDEditor.Markdown source={post?.content || '帖子内容'} />
+        </div>
 
         <div style={{ marginTop: 24 }}>
           <Space size="large">
             <Button
-              icon={liked ? <LikeFilled /> : <LikeOutlined />}
-              onClick={() => setLiked(!liked)}
+              icon={liked ? <LikeFilled style={{ color: '#ff4d4f' }} /> : <LikeOutlined />}
+              onClick={handleLike}
+              style={liked ? { color: '#ff4d4f', borderColor: '#ff4d4f', background: '#fff0f0' } : {}}
             >
-              点赞
+              点赞 {post?.thumbNum ?? 0}
             </Button>
             <Button
-              icon={collected ? <StarFilled /> : <StarOutlined />}
-              onClick={() => setCollected(!collected)}
+              icon={collected ? <StarFilled style={{ color: '#ff4d4f' }} /> : <StarOutlined />}
+              onClick={handleFavour}
+              style={collected ? { color: '#ff4d4f', borderColor: '#ff4d4f', background: '#fff0f0' } : {}}
             >
-              收藏
+              收藏 {post?.favourNum ?? 0}
             </Button>
+            {isMyPost && (
+              <Button 
+                type="primary" 
+                onClick={() => {
+                  window.location.href = `/forum/publish?id=${id}`;  // 使用 window.location.href 进行跳转
+                }}
+              >
+                修改
+              </Button>
+            )}
             <Button icon={<ShareAltOutlined />}>
               分享
             </Button>
           </Space>
         </div>
-
         <Divider />
 
         <div>

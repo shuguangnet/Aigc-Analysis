@@ -99,9 +99,9 @@ const ForumList: React.FC = () => {
             className={styles.postItem}
             actions={[
               <Space key={"actions"} className={styles.postStats}>
-                <span key="views" className={styles.statItem}>
+                {/* <span key="views" className={styles.statItem}>
                   <EyeOutlined /> {item.viewNum || 0}
-                </span>
+                </span> */}
                 <span key="comments" className={styles.statItem}>
                   <MessageOutlined /> {item.commentNum || 0}
                 </span>
@@ -158,7 +158,13 @@ const ForumList: React.FC = () => {
                 </Space>
               }
             />
-            <div className={styles.postContent}>
+            <div className={styles.postContent} style={{
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 5,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}>
               {item.content}
             </div>
           </List.Item>
