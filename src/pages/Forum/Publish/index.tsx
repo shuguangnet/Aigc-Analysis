@@ -1,30 +1,34 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, Button, Upload, Select, message, Space, Alert } from 'antd';
-import { PlusOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+import { Card, Form, Input, Button, Select, message, Alert } from 'antd';
 import { history } from '@umijs/max';
 import styles from './index.less';
+import MDEditor from '@uiw/react-md-editor'; // 直接引入，不用 next/dynamic
+import '@uiw/react-md-editor/markdown-editor.css';
+import '@uiw/react-markdown-preview/markdown.css';
+import { addPostUsingPost } from '@/services/hebi/postController';
 
 const { TextArea } = Input;
 
 const ForumPublish: React.FC = () => {
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [submitting, setSubmitting] = useState(false);
-
-  const categories = [
-    { value: 'tech', label: '技术讨论', description: '分享技术经验和最佳实践' },
-    { value: 'share', label: '经验分享', description: '分享数据分析案例和心得' },
-    { value: 'question', label: '问题求助', description: '寻求技术支持和解决方案' },
-  ];
+  const [mdContent, setMdContent] = useState<string>(''); // 新增
 
   const handleSubmit = async (values: any) => {
     setSubmitting(true);
     try {
-      // 处理表单提交
-      console.log('提交数据:', values);
-      message.success('发布成功');
-      history.push('/forum/list');
+      const postAddRequest = {
+        title: values.title,
+        content: mdContent, // 使用 Markdown 内容
+        tags: values.tags || [],
+      };
+      const res = await addPostUsingPost(postAddRequest);
+      if (res && res.code === 0) {
+        message.success('发布成功');
+        history.push('/forum/list');
+      } else {
+        message.error(res?.message || '发布失败');
+      }
     } catch (error) {
       message.error('发布失败');
     }
@@ -41,7 +45,6 @@ const ForumPublish: React.FC = () => {
           showIcon
           style={{ marginBottom: 24 }}
         />
-        
         <Form
           form={form}
           layout="vertical"
@@ -62,72 +65,35 @@ const ForumPublish: React.FC = () => {
               maxLength={100}
             />
           </Form.Item>
-
           <Form.Item
-            name="category"
-            label={<span className={styles.formLabel}>分类</span>}
-            rules={[{ required: true, message: '请选择分类' }]}
-            tooltip={{
-              title: '选择合适的分类有助于其他用户更好地找到您的帖子',
-              icon: <InfoCircleOutlined />
-            }}
-          >
-            <Select placeholder="请选择帖子分类">
-              {categories.map(cat => (
-                <Select.Option key={cat.value} value={cat.value}>
-                  <Space>
-                    {cat.label}
-                    <span style={{ color: '#999', fontSize: '12px' }}>
-                      ({cat.description})
-                    </span>
-                  </Space>
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="content"
-            label={<span className={styles.formLabel}>内容</span>}
+            name="tags"
+            label={<span className={styles.formLabel}>标签</span>}
             rules={[
-              { required: true, message: '请输入内容' },
-              { min: 20, message: '内容至少20个字符' }
+              { required: false, type: 'array', message: '请输入标签' }
             ]}
           >
-            <TextArea 
-              rows={12} 
-              placeholder="请详细描述您要分享的内容..." 
-              showCount
-              maxLength={5000}
+            <Select
+              mode="tags"
+              style={{ width: '100%' }}
+              placeholder="请输入标签，回车分隔"
+              tokenSeparators={[',', '，']}
             />
           </Form.Item>
-
-          <Form.Item 
-            label={<span className={styles.formLabel}>封面图</span>}
-            extra={<div className={styles.uploadHint}>支持 jpg、png 格式，建议尺寸 800x450px</div>}
+          {/* Markdown 编辑器替换内容输入 */}
+          <Form.Item
+            label={<span className={styles.formLabel}>内容</span>}
+            required
           >
-            <Upload
-              listType="picture-card"
-              fileList={fileList}
-              onChange={({ fileList }) => setFileList(fileList)}
-              beforeUpload={(file) => {
-                const isImage = file.type.startsWith('image/');
-                if (!isImage) {
-                  message.error('只能上传图片文件！');
-                }
-                return false;
-              }}
-              maxCount={1}
-            >
-              {fileList.length < 1 && (
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>上传图片</div>
-                </div>
-              )}
-            </Upload>
+            <div data-color-mode="light">
+              <MDEditor
+                value={mdContent}
+                onChange={setMdContent}
+                height={400}
+                preview="edit"
+                placeholder="请使用 Markdown 语法详细描述您要分享的内容..."
+              />
+            </div>
           </Form.Item>
-
           <div className={styles.buttonGroup}>
             <Button onClick={() => history.back()}>
               取消

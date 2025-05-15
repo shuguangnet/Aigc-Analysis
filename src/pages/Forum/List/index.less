@@ -1,62 +1,83 @@
 .forumContainer {
-  .searchBar {
+  background: #f6f8fa;
+  min-height: 100vh;
+  padding: 32px 0;
+}
+.searchBar {
+  background: #fff;
+  border-radius: 12px;
+  margin: 0 auto 24px auto;
+  // max-width: 1100px;
+  box-shadow: 0 2px 8px #f0f1f2;
+  padding: 24px 32px;
+}
+.listCard {
+  background: #fff;
+  border-radius: 12px;
+  // max-width: 1100px;
+  margin: 0 auto;
+  box-shadow: 0 2px 16px #f0f1f2;
+  padding: 16px 0;
+}
+.postItem {
+  border-radius: 10px;
+  margin-bottom: 18px;
+  transition: box-shadow 0.2s;
+  background: #fafbfc;
+  &:hover {
+    box-shadow: 0 4px 16px #e6e6e6;
     background: #fff;
-    padding: 16px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    margin-bottom: 16px;
   }
-
-  .postItem {
-    transition: all 0.3s;
-    
-    &:hover {
-      background-color: #fafafa;
-    }
-
-    .postTitle {
-      font-size: 18px;
-      font-weight: 500;
-      color: #1a1a1a;
-      
-      &:hover {
-        color: #1890ff;
-      }
-    }
-
-    .postMeta {
-      color: #8c8c8c;
-      font-size: 14px;
-    }
-
-    .postStats {
-      color: #595959;
-      font-size: 14px;
-      
-      .statItem {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        
-        &:hover {
-          color: #1890ff;
-        }
-      }
-    }
-
-    .coverImage {
-      border-radius: 8px;
-      object-fit: cover;
-      transition: transform 0.3s;
-      
-      &:hover {
-        transform: scale(1.02);
-      }
-    }
+}
+.postTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+  &:hover {
+    color: #1677ff;
+    text-decoration: underline;
   }
-
-  .categoryTag {
-    border-radius: 12px;
-    padding: 2px 12px;
-  }
+}
+.categoryTag {
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 0 8px;
+}
+.topBadge {
+  font-size: 13px;
+  margin-left: 4px;
+}
+.postMeta {
+  color: #888;
+  font-size: 13px;
+}
+.author {
+  font-weight: 500;
+  color: #555;
+}
+.postContent {
+  margin-top: 8px;
+  color: #444;
+  font-size: 15px;
+  line-height: 1.7;
+  word-break: break-all;
+}
+.coverImage {
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px #eee;
+}
+.postStats {
+  font-size: 14px;
+  color: #888;
+  gap: 18px;
+}
+.statItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.publishBtn {
+  border-radius: 6px;
+  font-weight: 500;
 }
