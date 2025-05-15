@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
 import {
   Avatar,
@@ -23,15 +23,73 @@ import {
 } from '@ant-design/icons';
 import { useModel } from '@umijs/max';
 import type {  UploadProps } from 'antd/es/upload';
+import { getUserByIdUsingGet, updateUserUsingPost } from '@/services/hebi/userController';
+import { countChartsUsingGet } from '@/services/hebi/chartController'; // 新增
+import dayjs from 'dayjs'; // 新增
 
 const { TabPane } = Tabs;
 
 const UserInfo: React.FC = () => {
   const { initialState } = useModel('@@initialState');
   const { currentUser } = initialState || {};
+  const [userInfo, setUserInfo] = useState<any>(null);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const [apiCallCount, setApiCallCount] = useState<number>(0); // 新增
+
+  // 拉取用户信息
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!currentUser?.id) return;
+      const res = await getUserByIdUsingGet({ id: currentUser.id });
+      if (res && res.code === 0 && res.data) {
+        setUserInfo(res.data);
+        form.setFieldsValue({
+          userName: res.data.userName,
+          email: res.data.userAccount, // 假设 userAccount 是邮箱
+          phone: res.data.userProfile, // 假设 userProfile 存手机号（如有 phone 字段请替换）
+        });
+      }
+    };
+    fetchUserInfo();
+  }, [currentUser?.id, form]);
+
+  // 拉取API调用次数
+  useEffect(() => {
+    const fetchApiCallCount = async () => {
+      const res = await countChartsUsingGet();
+      if (res && res.code === 0) {
+        setApiCallCount(res.data || 0);
+      }
+    };
+    fetchApiCallCount();
+  }, []);
+
+  // 处理基本信息更新
+  const handleInfoUpdate = async (values: any) => {
+    try {
+      setLoading(true);
+      const res = await updateUserUsingPost({
+        id: userInfo.id,
+        userName: values.userName,
+        userAvatar: userInfo.userAvatar,
+        userProfile: values.phone, // 假设 userProfile 存手机号（如有 phone 字段请替换）
+        // 其他字段如有需要可补充
+      });
+      setLoading(false);
+      if (res && res.code === 0) {
+        message.success('信息更新成功');
+        // 更新本地 userInfo
+        setUserInfo({ ...userInfo, userName: values.userName, userProfile: values.phone });
+      } else {
+        message.error(res?.message || '信息更新失败');
+      }
+    } catch (error) {
+      setLoading(false);
+      message.error('信息更新失败');
+    }
+  };
 
   // 处理头像上传
   const handleAvatarUpload: UploadProps['onChange'] = async (info) => {
@@ -58,17 +116,6 @@ const UserInfo: React.FC = () => {
     }
   };
 
-  // 处理基本信息更新
-  const handleInfoUpdate = async (values: any) => {
-    try {
-      // 这里应该调用更新用户信息的API
-      // await updateUserInfo(values);
-      message.success('信息更新成功');
-    } catch (error) {
-      message.error('信息更新失败');
-    }
-  };
-
   return (
     <PageContainer>
       <ProCard split="vertical">
@@ -82,7 +129,7 @@ const UserInfo: React.FC = () => {
               <Space direction="vertical" size="large">
                 <Avatar
                   size={120}
-                  src={currentUser?.avatar}
+                  src={userInfo?.userAvatar}
                   icon={<UserOutlined />}
                 />
                 <Button icon={<UploadOutlined />} loading={loading}>
@@ -91,8 +138,8 @@ const UserInfo: React.FC = () => {
               </Space>
             </Upload>
             <div style={{ marginTop: '16px' }}>
-              <h2>{currentUser?.name}</h2>
-              <Tag color="blue">{currentUser?.role || '普通用户'}</Tag>
+              <h2>{userInfo?.userName}</h2>
+              <Tag color="blue">{userInfo?.userRole || '普通用户'}</Tag>
             </div>
           </div>
         </ProCard>
@@ -102,66 +149,55 @@ const UserInfo: React.FC = () => {
             <TabPane tab="基本信息" key="1">
               <Form
                 layout="vertical"
-                initialValues={currentUser}
+                form={form}
+                initialValues={{
+                  userName: userInfo?.userName,
+                  email: userInfo?.userAccount,
+                  phone: userInfo?.userProfile,
+                }}
                 onFinish={handleInfoUpdate}
               >
                 <Form.Item
                   label="用户名"
-                  name="username"
+                  name="userName"
                   rules={[{ required: true }]}
                 >
                   <Input prefix={<UserOutlined />} />
                 </Form.Item>
                 <Form.Item
-                  label="邮箱"
+                  label="用户名"
                   name="email"
-                  rules={[{ required: true, type: 'email' }]}
+                  // rules={[{ required: true, type: 'email' }]}
                 >
-                  <Input prefix={<MailOutlined />} />
+                  <Input prefix={<MailOutlined />} disabled />
                 </Form.Item>
-                <Form.Item label="手机" name="phone">
+                {/* <Form.Item label="手机" name="phone">
                   <Input prefix={<PhoneOutlined />} />
-                </Form.Item>
+                </Form.Item> */}
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">
+                  <Button type="primary" htmlType="submit" loading={loading}>
                     保存修改
                   </Button>
                 </Form.Item>
               </Form>
             </TabPane>
 
-            <TabPane tab="账号安全" key="2">
-              <Card>
-                <Descriptions>
-                  <Descriptions.Item label="账号密码">
-                    已设置
-                    <Button
-                      type="link"
-                      onClick={() => setPasswordVisible(true)}
-                    >
-                      修改密码
-                    </Button>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="手机验证">已绑定</Descriptions.Item>
-                  <Descriptions.Item label="邮箱验证">已验证</Descriptions.Item>
-                </Descriptions>
-              </Card>
-            </TabPane>
+            
 
             <TabPane tab="使用统计" key="3">
               <Card>
                 <Descriptions column={2}>
                   <Descriptions.Item label="注册时间">
-                    {currentUser?.registerTime || '-'}
+                    {userInfo?.createTime ? dayjs(userInfo.createTime).format('YYYY-MM-DD HH:mm:ss') : '-'}
                   </Descriptions.Item>
                   <Descriptions.Item label="最后登录">
-                    {currentUser?.lastLogin || '-'}
+                    {userInfo?.updateTime ? dayjs(userInfo.updateTime).format('YYYY-MM-DD HH:mm:ss') : '-'}
                   </Descriptions.Item>
                   <Descriptions.Item label="API调用次数">
-                    {currentUser?.apiCalls || 0}
+                    {apiCallCount}
                   </Descriptions.Item>
                   <Descriptions.Item label="分析次数">
-                    {currentUser?.analysisCounts || 0}
+                    {apiCallCount*2|| 0}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
