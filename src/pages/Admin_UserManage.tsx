@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { PageContainer } from '@ant-design/pro-components';
 import { Table, Button, Modal, Form, Input, Space, Popconfirm, message, Avatar, Select } from 'antd';
 import { listUserByPageUsingPost, updateUserUsingPost, deleteUserUsingPost, addUserUsingPost } from '@/services/hebi/userController';
+import dayjs from 'dayjs'; // 新增
 
 const { Option } = Select;
 
@@ -167,6 +168,7 @@ const UserManage: React.FC = () => {
       dataIndex: 'createTime',
       width: 180,
       align: 'center',
+      render: (time: string) => time ? dayjs(time).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '操作',

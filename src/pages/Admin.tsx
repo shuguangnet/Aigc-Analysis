@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { PageContainer } from '@ant-design/pro-components';
 import { Table, Button, Modal, Form, Input, Tag, Space, Popconfirm, message, Avatar } from 'antd';
 import { listAllPostsUsingGet, updatePostUsingPost, deletePostUsingPost, addPostUsingPost } from '@/services/hebi/postController';
+import dayjs from 'dayjs'; // 新增
 
 const ForumAdmin: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -116,6 +117,7 @@ const ForumAdmin: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createTime',
       width: 180,
+      render: (time: string) => time ? dayjs(time).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '操作',
