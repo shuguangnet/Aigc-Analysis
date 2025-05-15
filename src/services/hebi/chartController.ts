@@ -17,6 +17,14 @@ export async function addChartUsingPost(
   });
 }
 
+/** countCharts GET /api/chart/count */
+export async function countChartsUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/chart/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** deleteChart POST /api/chart/delete */
 export async function deleteChartUsingPost(
   body: API.DeleteRequest,
@@ -129,6 +137,22 @@ export async function genChartByAiAsyncUsingPost(
   });
 }
 
+/** getChartGenerationStats GET /api/chart/gen/stats */
+export async function getChartGenerationStatsUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseMapStringObject_>('/api/chart/gen/stats', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** getChartGenerationSuccessRate GET /api/chart/gen/success-rate */
+export async function getChartGenerationSuccessRateUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseDouble_>('/api/chart/gen/success-rate', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** getChartById GET /api/chart/get */
 export async function getChartByIdUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -159,6 +183,22 @@ export async function listChartByPageUsingPost(
   });
 }
 
+/** countMyCharts GET /api/chart/my/count */
+export async function countMyChartsUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/chart/my/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** getMyChartGenerationSuccessRate GET /api/chart/my/gen/success-rate */
+export async function getMyChartGenerationSuccessRateUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseDouble_>('/api/chart/my/gen/success-rate', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** listMyChartByPage POST /api/chart/my/list/page */
 export async function listMyChartByPageUsingPost(
   body: API.ChartQueryRequest,
@@ -174,6 +214,30 @@ export async function listMyChartByPageUsingPost(
   });
 }
 
+/** getMyTodayChartCount GET /api/chart/my/today/count */
+export async function getMyTodayChartCountUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/chart/my/today/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** getMyWeekChartSuccessCount GET /api/chart/my/week/success/count */
+export async function getMyWeekChartSuccessCountUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseListInt_>('/api/chart/my/week/success/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** getTodayChartCount GET /api/chart/today/count */
+export async function getTodayChartCountUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/chart/today/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** updateChart POST /api/chart/update */
 export async function updateChartUsingPost(
   body: API.ChartUpdateRequest,
@@ -185,6 +249,14 @@ export async function updateChartUsingPost(
       'Content-Type': 'application/json',
     },
     data: body,
+    ...(options || {}),
+  });
+}
+
+/** getWeekChartSuccessCount GET /api/chart/week/success/count */
+export async function getWeekChartSuccessCountUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseListInt_>('/api/chart/week/success/count', {
+    method: 'GET',
     ...(options || {}),
   });
 }

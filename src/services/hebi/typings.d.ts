@@ -22,9 +22,27 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseDouble_ = {
+    code?: number;
+    data?: number;
+    message?: string;
+  };
+
   type BaseResponseInt_ = {
     code?: number;
     data?: number;
+    message?: string;
+  };
+
+  type BaseResponseListInt_ = {
+    code?: number;
+    data?: number[];
+    message?: string;
+  };
+
+  type BaseResponseListPostVO_ = {
+    code?: number;
+    data?: PostVO[];
     message?: string;
   };
 
@@ -37,6 +55,12 @@ declare namespace API {
   type BaseResponseLong_ = {
     code?: number;
     data?: number;
+    message?: string;
+  };
+
+  type BaseResponseMapStringObject_ = {
+    code?: number;
+    data?: Record<string, any>;
     message?: string;
   };
 
@@ -278,7 +302,6 @@ declare namespace API {
     createTime?: string;
     favourNum?: number;
     id?: number;
-    isDelete?: number;
     tags?: string;
     thumbNum?: number;
     title?: string;
@@ -361,7 +384,6 @@ declare namespace API {
   type User = {
     createTime?: string;
     id?: number;
-    isDelete?: number;
     updateTime?: string;
     userAccount?: string;
     userAvatar?: string;

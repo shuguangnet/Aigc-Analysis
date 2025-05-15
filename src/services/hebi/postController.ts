@@ -14,6 +14,14 @@ export async function addPostUsingPost(body: API.PostAddRequest, options?: { [ke
   });
 }
 
+/** countPosts GET /api/post/count */
+export async function countPostsUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/post/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** deletePost POST /api/post/delete */
 export async function deletePostUsingPost(
   body: API.DeleteRequest,
@@ -59,6 +67,14 @@ export async function getPostVoByIdUsingGet(
   });
 }
 
+/** listAllPosts GET /api/post/list/all */
+export async function listAllPostsUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseListPostVO_>('/api/post/list/all', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** listPostByPage POST /api/post/list/page */
 export async function listPostByPageUsingPost(
   body: API.PostQueryRequest,
@@ -85,6 +101,14 @@ export async function listPostVoByPageUsingPost(
       'Content-Type': 'application/json',
     },
     data: body,
+    ...(options || {}),
+  });
+}
+
+/** countMyPosts GET /api/post/my/count */
+export async function countMyPostsUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/post/my/count', {
+    method: 'GET',
     ...(options || {}),
   });
 }

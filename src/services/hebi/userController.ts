@@ -14,6 +14,14 @@ export async function addUserUsingPost(body: API.UserAddRequest, options?: { [ke
   });
 }
 
+/** countUsers GET /api/user/count */
+export async function countUsersUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/user/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** deleteUser POST /api/user/delete */
 export async function deleteUserUsingPost(
   body: API.DeleteRequest,
