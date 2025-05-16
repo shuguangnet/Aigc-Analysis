@@ -156,13 +156,7 @@ const UserManage: React.FC = () => {
         return <span>普通用户</span>;
       },
     },
-    {
-      title: '简介',
-      dataIndex: 'userProfile',
-      width: 200,
-      align: 'center',
-      ellipsis: true,
-    },
+    
     {
       title: '创建时间',
       dataIndex: 'createTime',
@@ -233,9 +227,9 @@ const UserManage: React.FC = () => {
           <Form.Item name="userAvatar" label="头像链接">
             <Input />
           </Form.Item>
-          <Form.Item name="userProfile" label="简介">
+          {/* <Form.Item name="userProfile" label="简介">
             <Input.TextArea rows={3} />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item name="userRole" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
             <Select>
               <Option value="user">普通用户</Option>

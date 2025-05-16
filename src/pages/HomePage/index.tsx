@@ -343,7 +343,7 @@ const HomePage: React.FC = () => {
             <Space direction="vertical" style={{ width: '100%' }}>
               <Statistic
                 title="当前活跃用户"
-                value={totalUsers * 0.8}
+                value={Math.ceil(totalUsers * 0.8)}
                 prefix={<UserOutlined />}
               />
               <Progress

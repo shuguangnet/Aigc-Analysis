@@ -95,6 +95,7 @@ const ForumAdmin: React.FC = () => {
     {
       title: '标签',
       dataIndex: 'tagList',
+      width: 200,
       render: (tags: string[]) => (
         <>
           {tags?.map(tag => (
