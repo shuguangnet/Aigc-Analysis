@@ -34,6 +34,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseListCommentVO_ = {
+    code?: number;
+    data?: CommentVO[];
+    message?: string;
+  };
+
   type BaseResponseListInt_ = {
     code?: number;
     data?: number[];
@@ -181,6 +187,18 @@ declare namespace API {
     userId?: number;
   };
 
+  type CommentAddRequest = {
+    content?: string;
+    postId?: number;
+  };
+
+  type CommentVO = {
+    content?: string;
+    createTime?: string;
+    userAvatar?: string;
+    userName?: string;
+  };
+
   type DeleteRequest = {
     id?: number;
   };
@@ -200,6 +218,11 @@ declare namespace API {
   type getChartByIdUsingGETParams = {
     /** id */
     id?: number;
+  };
+
+  type getCommentListByPostIdUsingGETParams = {
+    /** postId */
+    postId: number;
   };
 
   type getPostVOByIdUsingGETParams = {
@@ -302,6 +325,7 @@ declare namespace API {
     createTime?: string;
     favourNum?: number;
     id?: number;
+    isDelete?: number;
     tags?: string;
     thumbNum?: number;
     title?: string;
