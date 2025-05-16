@@ -5,7 +5,7 @@ export default [
   ]},
   {path:"/", redirect: "/home"},
 
-  { path: '/home', name :"首页", icon: "PieChartOutlined", component: './HomePage' },
+  { path: '/home', name :"首页", icon: "PieChartOutlined", component: './HomePage',access: 'canAdmin', },
   { path: '/add_chart', name :"智能分析", icon: "barChart", component: './AddChart' },
   { path: '/add_async', name: "异步分析", icon: "DotChartOutlined", component: './AddChartAsync' },
   { path: '/my_chart', name: "我的图表", icon: "PictureOutlined", component: './MyChart' },
@@ -29,7 +29,7 @@ export default [
     path: '/admin',
     name: '后台管理',
     icon: 'crown',
-    // access: 'canAdmin',
+    access: 'canAdmin',
     routes: [
       { path: '/admin', redirect: '/admin/sub-page' },
       { path: '/admin/sub-page', name: '论坛管理', component: './Admin' },
