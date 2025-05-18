@@ -94,10 +94,11 @@ useEffect(()=>{
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
         // 登录成功后，设置刷新标记并刷新页面
-        const urlParams = new URL(window.location.href).searchParams;
-        history.push(urlParams.get('redirect') || '/');
+        // const urlParams = new URL(window.location.href).searchParams;
+        // history.push(urlParams.get('redirect') || '/');
         sessionStorage.setItem('avatar_refreshed', '1');
-        window.location.href = urlParams.get('redirect') || '/';
+        window.location.href =  '/user/access';
+        history.push('/user/access');
         return;
       } else {
         message.error(res.message);
