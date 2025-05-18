@@ -201,7 +201,7 @@ const UserInfo: React.FC = () => {
                   <Input prefix={<UserOutlined />} />
                 </Form.Item>
                 <Form.Item
-                  label="用户名"
+                  label="账号"
                   name="email"
                   // rules={[{ required: true, type: 'email' }]}
                 >
