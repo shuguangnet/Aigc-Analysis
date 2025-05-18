@@ -63,7 +63,7 @@ const Register: React.FC = () => {
         return;
       }
 
-      const res = await userRegisterUsingPost({ ...values, userAvatar: 'https://img-oss.shuguangwl.com/2025/05/18/6829ae97cee35.png' });
+      const res = await userRegisterUsingPost({ ...values, userAvatar: 'http://img-oss.shuguangwl.com/2025/05/18/6829ae97cee35.png' });
       if (res.code === 0) {
         message.success('注册成功！');
         history.push('/user/login');
