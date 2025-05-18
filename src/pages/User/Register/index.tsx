@@ -1,5 +1,6 @@
 import { Footer } from '@/components';
 import { userRegisterUsingPost } from '@/services/hebi/userController';
+import { uploadFileUsingPost } from '@/services/hebi/fileController';
 import { LockOutlined, PictureOutlined, UserOutlined } from '@ant-design/icons';
 import { ProForm, ProFormText } from '@ant-design/pro-components';
 import { Helmet, history, Link } from '@umijs/max';
@@ -62,7 +63,7 @@ const Register: React.FC = () => {
         return;
       }
 
-      const res = await userRegisterUsingPost({ ...values, userAvatar: avatarUrl });
+      const res = await userRegisterUsingPost({ ...values, userAvatar: 'https://img-oss.shuguangwl.com/2025/05/18/6829ae97cee35.png' });
       if (res.code === 0) {
         message.success('注册成功！');
         history.push('/user/login');
@@ -80,6 +81,8 @@ const Register: React.FC = () => {
       <div style={{ marginTop: 8 }}>上传头像</div>
     </div>
   );
+
+ 
 
   return (
     <div className={styles.container}>
@@ -111,25 +114,7 @@ const Register: React.FC = () => {
               },
             }}
           >
-            <ProForm.Item
-              name="userAvatar"
-              rules={[{ required: true, message: '请上传头像' }]}
-              className={styles.avatarUploader}
-            >
-              <Upload
-                name="avatar"
-                listType="picture-card"
-                showUploadList={false}
-                action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                onChange={(info) => {
-                  if (info.file.status === 'done') {
-                    setAvatarUrl(info.file.response.url);
-                  }
-                }}
-              >
-                {avatarUrl ? <Avatar src={avatarUrl} size={64} /> : uploadButton}
-              </Upload>
-            </ProForm.Item>
+            
 
             <ProFormText
               name="userAccount"

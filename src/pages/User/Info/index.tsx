@@ -25,6 +25,7 @@ import { useModel } from '@umijs/max';
 import type {  UploadProps } from 'antd/es/upload';
 import { getUserByIdUsingGet, updateUserUsingPost } from '@/services/hebi/userController';
 import { countChartsUsingGet } from '@/services/hebi/chartController'; // 新增
+import { uploadFileUsingPost } from '@/services/hebi/fileController';
 import dayjs from 'dayjs'; // 新增
 
 const { TabPane } = Tabs;
@@ -37,7 +38,7 @@ const UserInfo: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [apiCallCount, setApiCallCount] = useState<number>(0); // 新增
-
+  const [avatarUrl, setAvatarUrl] = useState<string>();
   // 拉取用户信息
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -73,7 +74,7 @@ const UserInfo: React.FC = () => {
       const res = await updateUserUsingPost({
         id: userInfo.id,
         userName: values.userName,
-        userAvatar: userInfo.userAvatar,
+        userAvatar: avatarUrl||userInfo.userAvatar,
         userProfile: values.phone, // 假设 userProfile 存手机号（如有 phone 字段请替换）
         // 其他字段如有需要可补充
       });
@@ -88,6 +89,39 @@ const UserInfo: React.FC = () => {
     } catch (error) {
       setLoading(false);
       message.error('信息更新失败');
+    }
+  };
+
+    const handleUploadChange = async (info: any) => {
+    if (info.file.status === 'uploading') {
+      return;
+    }
+    if (info.file.status === 'done') {
+      const response = info.file.response;
+      if (response.code === 0) {
+        setAvatarUrl(response.data);
+        message.success('头像上传成功');
+        // 更新表单字段值
+        form.setFieldValue('userAvatar', response.data);
+      } else {
+        message.error(response.message || '头像上传失败');
+      }
+    }
+  };
+
+  const customRequest = async ({ file, onSuccess, onError }: any) => {
+    try {
+      const res = await uploadFileUsingPost(file, {
+        file,
+        biz: 'user_avatar',
+      });
+      if (res.code === 0) {
+        onSuccess(res);
+      } else {
+        onError(new Error(res.message));
+      }
+    } catch (error) {
+      onError(error);
     }
   };
 
@@ -124,12 +158,14 @@ const UserInfo: React.FC = () => {
             <Upload
               name="avatar"
               showUploadList={false}
-              onChange={handleAvatarUpload}
+              // onChange={handleAvatarUpload}
+              customRequest={customRequest}
+              onChange={handleUploadChange}
             >
               <Space direction="vertical" size="large">
                 <Avatar
                   size={120}
-                  src={userInfo?.userAvatar}
+                  src={avatarUrl || userInfo?.userAvatar}
                   icon={<UserOutlined />}
                 />
                 <Button icon={<UploadOutlined />} loading={loading}>

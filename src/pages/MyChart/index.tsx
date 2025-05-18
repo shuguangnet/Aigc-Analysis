@@ -1,4 +1,4 @@
-import { listChartByPageUsingPost } from '@/services/hebi/chartController';
+import { listChartByPageUsingPost,listMyChartByPageUsingPost } from '@/services/hebi/chartController';
 import { useModel } from '@@/exports';
 import { Avatar, Card, Input, List, message, Result } from 'antd';
 import ReactECharts from 'echarts-for-react';
@@ -30,7 +30,7 @@ const MyChartPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await listChartByPageUsingPost(searchParams);
+      const res = currentUser?.userRole==='user'?await listMyChartByPageUsingPost(searchParams):await listChartByPageUsingPost(searchParams);
       if (res.data) {
         setChartList(res.data.records ?? []);
         setTotal(res.data.total ?? 0);

@@ -1,11 +1,13 @@
 export default [
   {path: '/user',layout: false,routes: [
     { name: '登录', path: '/user/login', component: './User/Login' },
-    { name: '注册', path: '/user/register', component: './User/Register' }
+    { name: '注册', path: '/user/register', component: './User/Register' },
+    { name :"权限引导",path: '/user/access',  component: './Access'},
   ]},
-  {path:"/", redirect: "/home"},
+  {path:"/", redirect: "/user/access"},
 
   { path: '/home', name :"首页", icon: "PieChartOutlined", component: './HomePage',access: 'canAdmin', },
+  // { path: '/access', name :"权限引导", icon: "PieChartOutlined", component: './Access',hidden: true},
   { path: '/add_chart', name :"智能分析", icon: "barChart", component: './AddChart' },
   { path: '/add_async', name: "异步分析", icon: "DotChartOutlined", component: './AddChartAsync' },
   { path: '/my_chart', name: "我的图表", icon: "PictureOutlined", component: './MyChart' },
